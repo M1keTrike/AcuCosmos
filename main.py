@@ -1,0 +1,141 @@
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from src.ga_acucosmos import EjecutarAG
+from src.aptitud import FuncionAptitud
+from src.visualizacion import ResumenEscenario
+
+MOSTRAR_GRAFICAS = True
+
+
+def CargarDatos(dir_data: str = 'data'):
+    catalogo = pd.read_csv(os.path.join(dir_data, 'catalogo_especies.csv'),
+                           encoding='utf-8-sig')
+    tanques = pd.read_csv(os.path.join(dir_data, 'catalogo_tanques.csv'),
+                          encoding='utf-8-sig')
+    mat = pd.read_csv(os.path.join(dir_data, 'matriz_compatibilidad.csv'),
+                      encoding='utf-8-sig', index_col=0)
+    matriz_kappa = mat.to_numpy(dtype=float)
+    return catalogo, tanques, matriz_kappa
+
+
+def EjecutarEscenario(nombre: str, descripcion: str,
+                      catalogo, tanques, matriz_kappa,
+                      pH_ref: float, temp_ref: float, presupuesto: float,
+                      tanques_permitidos=None,
+                      min_especies: int = 5,
+                      max_especies: int = 15,
+                      dir_salida: str = 'resultados'):
+    print(f"\n=== {descripcion} ===")
+    print(f"  pH_ref={pH_ref}, T_ref={temp_ref}, "
+          f"presupuesto=${presupuesto:,.0f} MXN, "
+          f"tanques={'todos' if tanques_permitidos is None else tanques_permitidos}")
+
+    mejor, historial, top_inds, top_apts, top_mets = EjecutarAG(
+        catalogo=catalogo,
+        tanques=tanques,
+        matriz_kappa=matriz_kappa,
+        pH_ref=pH_ref,
+        delta_pH=0.5,
+        presupuesto=presupuesto,
+        tanques_permitidos=tanques_permitidos,
+        tam_poblacion=80,
+        generaciones_max=150,
+        estancamiento_max=30,
+        min_especies=min_especies,
+        max_especies=max_especies,
+        verbose=True,
+    )
+    f_final, metricas = FuncionAptitud(mejor, catalogo, tanques, matriz_kappa,
+                                       pH_ref=pH_ref, delta_pH=0.5,
+                                       presupuesto=presupuesto,
+                                       max_especies=max_especies)
+
+    print("\n  Mejor global:")
+    print(f"    F_total   = {f_final:.4f}")
+    print(f"    n_especies= {metricas['n_especies']}")
+    print(f"    A_e={metricas['A_e']:.3f}  I_b={metricas['I_b']:.3f}  "
+          f"R_v={metricas['R_v']:.2f}  N_c={metricas['N_c']:.3f}  "
+          f"M_s={metricas['M_s']:.3f}")
+    print(f"    costo     = ${metricas['costo']:,} "
+          f"({metricas['costo']/presupuesto*100:.0f}% del presupuesto)")
+    print(f"    tanque    = #{mejor['tanque']+1} "
+          f"{tanques.iloc[mejor['tanque']]['nombre']} "
+          f"({tanques.iloc[mejor['tanque']]['volumen_L']} L)")
+    print(f"    factible  = {metricas['factible']}")
+
+    resumen = ResumenEscenario(nombre, mejor, historial,
+                               top_inds, top_apts, top_mets,
+                               catalogo, tanques, pH_ref, temp_ref,
+                               dir_salida,
+                               mostrar=MOSTRAR_GRAFICAS)
+
+    print("\n  Top 3 individuos:")
+    for k, (f, met) in enumerate(zip(top_apts, top_mets), start=1):
+        print(f"    Top {k}: F={f:.4f}  n_sp={met['n_especies']:>2}  "
+              f"A_e={met['A_e']:.3f}  I_b={met['I_b']:.3f}  "
+              f"R_v={met['R_v']:.2f}  N_c={met['N_c']:.3f}  "
+              f"M_s={met['M_s']:.3f}  ${met['costo']:,}")
+
+    print("\n  Reporte de salud (Top 3):")
+    print(resumen['salud'].to_string(index=False))
+
+    return mejor, historial, metricas
+
+
+def main():
+    catalogo, tanques, matriz_kappa = CargarDatos('data')
+    print(f"Catalogo: {len(catalogo)} especies")
+    print(f"Tanques:  {len(tanques)}")
+    print(f"Matriz:   {matriz_kappa.shape}")
+
+    dir_salida = 'resultados'
+    os.makedirs(dir_salida, exist_ok=True)
+
+    resultados = {}
+
+    resultados['E1'] = EjecutarEscenario(
+        nombre='escenario_1',
+        descripcion='Escenario 1: Acuario comunitario tropical',
+        catalogo=catalogo, tanques=tanques, matriz_kappa=matriz_kappa,
+        pH_ref=7.0, temp_ref=25.0, presupuesto=8000.0,
+        tanques_permitidos=None,
+        dir_salida=dir_salida,
+    )
+
+    resultados['E2'] = EjecutarEscenario(
+        nombre='escenario_2',
+        descripcion='Escenario 2: Biotopo amazonico acido',
+        catalogo=catalogo, tanques=tanques, matriz_kappa=matriz_kappa,
+        pH_ref=5.5, temp_ref=27.0, presupuesto=12000.0,
+        tanques_permitidos=None,
+        dir_salida=dir_salida,
+    )
+
+    resultados['E3'] = EjecutarEscenario(
+        nombre='escenario_3',
+        descripcion='Escenario 3: Nano-acuario 20L',
+        catalogo=catalogo, tanques=tanques, matriz_kappa=matriz_kappa,
+        pH_ref=7.0, temp_ref=24.0, presupuesto=3000.0,
+        tanques_permitidos=[0, 1],
+        min_especies=2,
+        max_especies=6,
+        dir_salida=dir_salida,
+    )
+
+    print("\n\n=== RESUMEN COMPARATIVO ===")
+    print(f"{'Escenario':<12} {'F_total':>8} {'n_sp':>5} {'A_e':>6} "
+          f"{'I_b':>6} {'R_v':>6} {'N_c':>6} {'M_s':>6} {'Costo':>10}")
+    for k, (mejor, hist, m) in resultados.items():
+        print(f"{k:<12} {hist[-1]['apt_mejor']:>8.4f} "
+              f"{m['n_especies']:>5d} {m['A_e']:>6.3f} {m['I_b']:>6.3f} "
+              f"{m['R_v']:>6.2f} {m['N_c']:>6.3f} {m['M_s']:>6.3f} "
+              f"${m['costo']:>9,}")
+
+    if MOSTRAR_GRAFICAS:
+        plt.show()
+
+
+if __name__ == '__main__':
+    main()

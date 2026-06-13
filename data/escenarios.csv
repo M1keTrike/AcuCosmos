@@ -1,0 +1,4 @@
+nombre,pH_ref,temp_ref,presupuesto,tanques_permitidos,min_especies,max_especies
+E1_comunitario,7.0,25.0,8000.0,,5,15
+E2_amazonico,5.5,27.0,12000.0,,5,15
+E3_nano,7.0,24.0,3000.0,"0,1",2,6
