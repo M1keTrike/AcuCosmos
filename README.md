@@ -1,4 +1,4 @@
-# 🐠 AcuCosmos
+# AcuCosmos
 
 **Diseño óptimo de acuarios mediante Algoritmos Genéticos.**
 
@@ -13,7 +13,7 @@ optimización), sobre un catálogo de **100 especies** y **10 tipos de tanque**.
 
 ---
 
-## ✨ Características
+##  Características
 
 - **Algoritmo genético propio** con operadores a medida: inicialización con distribución
   de Dirichlet, selección por torneo, cruza uniforme y 4 tipos de mutación.
@@ -29,7 +29,7 @@ optimización), sobre un catálogo de **100 especies** y **10 tipos de tanque**.
 
 ---
 
-## 🧬 El problema de optimización
+##  El problema de optimización
 
 Cada solución (cromosoma) codifica un acuario completo:
 
@@ -63,7 +63,7 @@ F_total = A_e + I_b + R_v_hat − N_c − M_s_hat + B_div
 
 ---
 
-## 📁 Estructura del proyecto
+##  Estructura del proyecto
 
 ```
 AcuCosmos/
@@ -86,7 +86,7 @@ AcuCosmos/
 
 ---
 
-## 🚀 Puesta en marcha
+## Puesta en marcha
 
 ### Requisitos
 - **Python 3.10+** (probado con 3.12)
@@ -127,7 +127,7 @@ pip install -r requirements.txt
 
 ---
 
-## ▶️ Uso
+##  Uso
 
 ### Opción A — Por consola
 
@@ -154,7 +154,7 @@ La GUI tiene 5 pestañas:
 
 ---
 
-## ⚙️ Parámetros principales del AG
+##  Parámetros principales del AG
 
 | Parámetro | Por defecto | Descripción |
 |---|---|---|
@@ -169,7 +169,7 @@ La GUI tiene 5 pestañas:
 
 ---
 
-## 📊 Resultados de ejemplo
+## Resultados de ejemplo
 
 | Escenario | Aptitud F | Especies | Tanque | Costo | Factible |
 |---|---|---|---|---|---|
@@ -185,7 +185,7 @@ cumplimiento de pH y temperatura** y el filtro siempre dentro de su capacidad.
 
 ---
 
-## 📤 Salidas generadas
+##  Salidas generadas
 
 Por cada escenario se generan en `resultados/`:
 
@@ -199,7 +199,7 @@ Por cada escenario se generan en `resultados/`:
 
 ---
 
-## 🛠️ Stack técnico
+##  Stack técnico
 
 - **Python** — lenguaje principal
 - **NumPy** — operaciones vectoriales y aleatoriedad
@@ -210,6 +210,10 @@ Por cada escenario se generan en `resultados/`:
 
 ---
 
-## 📄 Licencia
+##  Licencia
 
-Proyecto educativo / de demostración. Úsalo y adáptalo libremente.
+Distribuido bajo la **Licencia MIT**. Eres libre de usar, copiar, modificar y
+distribuir el proyecto conservando el aviso de copyright. Consulta el archivo
+[LICENSE](LICENSE) para más detalles.
+
+© 2026 Miguel Ángel Molina Gómez
