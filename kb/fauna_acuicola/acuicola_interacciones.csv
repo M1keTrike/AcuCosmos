@@ -1,0 +1,38 @@
+especie_a,especie_b,relacion,valor,mecanismo,procedencia,fuente,notas
+carpa_plateada,carpa_cabezona,complementariedad,2,nicho_distinto,investigado,FAO-carp,Fitoplancton vs zooplancton: filtran fracciones distintas.
+carpa_plateada,carpa_herbivora,complementariedad,2,nicho_distinto,investigado,FAO-carp,Filtrador de superficie vs herbivoro de macrofitas.
+carpa_plateada,carpa_comun,complementariedad,2,nicho_distinto,investigado,FAO-carp,Columna alta filtradora vs fondo bentonico.
+carpa_cabezona,carpa_herbivora,complementariedad,2,nicho_distinto,investigado,FAO-carp,Zooplancton vs vegetacion.
+carpa_herbivora,carpa_comun,complementariedad,2,limpia_desechos,investigado,FAO-carp,Heces de la herbivora alimentan a la carpa comun de fondo.
+catla,rohu,complementariedad,2,nicho_distinto,investigado,GlobalSeafood-IMC,Superficie (zooplancton) vs columna (perifiton).
+catla,mrigal,complementariedad,2,nicho_distinto,investigado,GlobalSeafood-IMC,Superficie vs fondo detritivoro.
+rohu,mrigal,complementariedad,2,nicho_distinto,investigado,GlobalSeafood-IMC,Columna vs fondo: sin solape.
+mrigal,kalbasu,competencia,-1,mismo_nicho,derivado,reglas,Ambos detritivoros de fondo: solape parcial.
+catla,carpa_plateada,competencia,-1,mismo_nicho,investigado,GlobalSeafood-IMC,Ambos planctivoros de superficie: competencia por plancton.
+catla,carpa_cabezona,competencia,-1,mismo_nicho,derivado,reglas,Ambos consumen zooplancton.
+mrigal,carpa_comun,competencia,-1,mismo_estrato,derivado,reglas,Ambos en el fondo: solape parcial bentonico.
+tilapia_nilo,camaron_gigante,complementariedad,2,nicho_distinto,investigado,ScienceDirect-prawn,Pez de columna + crustaceo de fondo: policultivo documentado.
+tilapia_nilo,bocachico,complementariedad,2,limpia_desechos,investigado,SciELO-bocachico,Omnivoro de columna + detritivoro de fondo (perifiton).
+tilapia_nilo,carpa_plateada,competencia,-1,mismo_nicho,derivado,reglas,Ambos aprovechan fitoplancton.
+tilapia_nilo,tilapia_mozambique,competencia,-1,mismo_nicho,derivado,reglas,Mismo genero y nicho; ademas hibridan.
+tilapia_nilo,mrigal,complementariedad,2,limpia_desechos,derivado,reglas,Detritivoro de fondo recicla desechos de la tilapia.
+cachama_negra,bocachico,complementariedad,2,nicho_distinto,investigado,SciELO-bocachico,Omnivoro de columna + iliofago de fondo.
+cachama_negra,cachama_blanca,competencia,-1,mismo_nicho,derivado,reglas,Ambos caracidos omnivoros de columna.
+cachama_negra,tilapia_nilo,complementariedad,1,nicho_distinto,investigado,FAO-cachama,Solape parcial; coexisten bien en semi-intensivo.
+cachama_blanca,bocachico,complementariedad,2,limpia_desechos,derivado,reglas,Columna + fondo detritivoro.
+bocachico,sabalo,competencia,-1,mismo_nicho,derivado,reglas,Dos Prochilodus detritivoros de fondo.
+bocachico,mrigal,competencia,-1,mismo_nicho,derivado,reglas,Detritivoros/iliofagos de fondo solapados.
+bagre_africano,tilapia_nilo,complementariedad,1,controla_superpoblacion,investigado,SRAC-catfish,Clarias depreda alevines y controla la sobrepoblacion de tilapia.
+bagre_canal,camaron_gigante,complementariedad,1,nicho_distinto,investigado,ScienceDirect-prawn,Policultivo documentado; vigilar talla relativa (riesgo de depredacion).
+pangasius,tilapia_nilo,complementariedad,1,nicho_distinto,derivado,reglas,Bagre de columna-fondo + tilapia: solape moderado.
+paiche,tilapia_nilo,depredacion,-2,depreda,investigado,IIAP-paiche,El paiche piscivoro consume tilapias pequenas (se usan como forraje).
+paiche,cachama_blanca,depredacion,-1,depreda,derivado,reglas,Depredacion dependiente de talla; cachama grande escapa.
+tucunare,tilapia_nilo,depredacion,-2,depreda,investigado,FishBase-Cichla,El tucunare depreda alevines y juveniles de tilapia.
+tucunare,silver_barb,depredacion,-2,depreda,derivado,reglas,Piscivoro vs pez pequeno de columna.
+surubi,bocachico,depredacion,-2,depreda,derivado,reglas,Gran bagre piscivoro de fondo depreda peces pequenos.
+rhamdia,tilapia_nilo,depredacion,-1,depreda,derivado,reglas,Depreda alevines; riesgo dependiente de talla.
+camaron_gigante,carpa_comun,complementariedad,1,nicho_distinto,investigado,ScienceDirect-prawn,Policultivo en estanques abonados; solape parcial de fondo.
+camaron_gigante,carpa_plateada,complementariedad,2,nicho_distinto,investigado,ScienceDirect-prawn,Crustaceo de fondo + carpa filtradora de columna.
+camaron_gigante,langostino_amazonico,competencia,-1,mismo_nicho,derivado,reglas,Dos Macrobrachium bentonicos: solape de nicho.
+trucha_arcoiris,tilapia_nilo,competencia,-2,incompatibilidad_termica,derivado,reglas,Rangos termicos opuestos (fria vs tropical): no coexisten en el mismo sitio.
+pejerrey,cachama_negra,competencia,-2,incompatibilidad_termica,derivado,reglas,Templada-fria vs tropical: incompatibilidad de sitio.

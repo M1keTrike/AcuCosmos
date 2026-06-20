@@ -1,0 +1,98 @@
+{
+  "config": {
+    "seed": 12345,
+    "tam_poblacion": 80,
+    "generaciones_max": 150,
+    "estancamiento_max": 30,
+    "delta_pH": 0.5,
+    "top_k": 3,
+    "nombre": "escenario_3",
+    "pH_ref": 7.0,
+    "presupuesto": 3000.0,
+    "tanques_permitidos": [
+      0,
+      1
+    ],
+    "min_especies": 2,
+    "max_especies": 6
+  },
+  "f_final": 2.304508547,
+  "mejor": {
+    "tanque": 1,
+    "activas": [
+      [
+        87,
+        1,
+        0.5
+      ],
+      [
+        88,
+        1,
+        0.5
+      ]
+    ]
+  },
+  "metricas": {
+    "A_e": 0.3861111111,
+    "I_b": 1.0,
+    "R_v": 1.5384615385,
+    "N_c": 0.0,
+    "M_s": 0.0175,
+    "costo": 1335,
+    "factible": true,
+    "n_especies": 2,
+    "B_div": 0.1666666667
+  },
+  "top_apts": [
+    2.304508547,
+    2.3006569452,
+    2.294008547
+  ],
+  "top_estructuras": [
+    {
+      "tanque": 1,
+      "activas": [
+        [
+          87,
+          1,
+          0.5
+        ],
+        [
+          88,
+          1,
+          0.5
+        ]
+      ]
+    },
+    {
+      "tanque": 1,
+      "activas": [
+        [
+          87,
+          1,
+          0.6721311475
+        ],
+        [
+          96,
+          2,
+          0.3278688525
+        ]
+      ]
+    },
+    {
+      "tanque": 0,
+      "activas": [
+        [
+          87,
+          1,
+          0.9011165974
+        ],
+        [
+          88,
+          1,
+          0.0988834026
+        ]
+      ]
+    }
+  ]
+}

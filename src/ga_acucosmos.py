@@ -23,8 +23,11 @@ def EjecutarAG(catalogo: pd.DataFrame,
                min_especies: int = 3,
                max_especies: int = 15,
                top_k: int = 3,
-               verbose: bool = True
+               verbose: bool = True,
+               seed: Optional[int] = None
                ) -> Tuple[Dict, List[Dict], List[Dict], List[float], List[Dict]]:
+    if seed is not None:
+        np.random.seed(seed)
     poblacion = FuncionInicializacion(
         tam_poblacion, catalogo, tanques,
         min_especies=min_especies, max_especies=max_especies,

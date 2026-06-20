@@ -1,0 +1,32 @@
+especie_a,especie_b,relacion,valor,mecanismo,procedencia,fuente,notas
+maiz,frijol_negro,sinergia,2,soporte_fisico;fijacion_N,investigado,Britannica Milpa; PMC Root Foraging 2015; Scientific Reports Guatemala,Maíz da soporte al frijol trepador; frijol fija N que usa el maíz; complementariedad de raíces documentada
+maiz,frijol_voluble,sinergia,2,soporte_fisico;fijacion_N,investigado,Britannica Milpa; PMC Root Foraging 2015,Relación idéntica a maíz-frijol negro; variedad de enrame clásica del sistema milpa
+maiz,calabaza,sinergia,2,cobertura_suelo;sombra,investigado,Britannica Milpa; PMC Root Foraging 2015,Calabaza cubre el suelo evitando malezas y reteniendo humedad bajo el maíz; sistema tres hermanas
+frijol_negro,calabaza,sinergia,2,fijacion_N;cobertura_suelo,investigado,PMC Root Foraging 2015; Nature Three Sisters,Frijol fija N disponible para calabaza; calabaza protege suelo; raíces en estratos distintos
+maiz,frijol_negro,sinergia,2,atrae_polinizadores,investigado,ScienceDirect Three Sisters Defenses 2024,Maíz señaliza vía volátiles a frijol para atraer insectos benéficos que depredan herbívoros del maíz
+tomate,albahaca,sinergia,2,repele_plagas,investigado,PMC Volatile Signaling 2024; PMC Allelopathy VCCS; NCSU,Volátiles de albahaca reprimen mosca blanca y afidos en tomate; comunicación vía señales MAPK documentada
+tomate,tagetes,sinergia,2,repele_plagas;planta_trampa,investigado,PMC Limonene Whitefly 2019; ScienceDirect Nematodes,Limoneno de Tagetes patula repele mosca blanca; raíces reducen nematodos cerca del tomate
+tomate,calendula,sinergia,1,repele_plagas,investigado,ScienceDirect Nematode Review; Laidback Gardener,Caléndula reduce nematodos en suelo; efectividad real requiere cultivo prolongado previo (no intercalada)
+zanahoria,cilantro,sinergia,1,atrae_polinizadores;repele_plagas,investigado,HGTV Companion; Gardening Know How; Gardener's Path,Cilantro en flor atrae parasitoides y sírfidos que depredan la mosca de zanahoria; aroma enmascara zanahoria
+zanahoria,romero,sinergia,1,repele_plagas,investigado,PSU Extension; Gardener's Path; multiple gardening sources,Aroma del romero repele la mosca de la zanahoria (Psila rosae); evidencia empírica amplia
+tomate,berenjena,antagonismo,-1,comparten_plagas,investigado,FAO; CABI; extension literature,Ambas Solanaceae; comparten mosca blanca; nematodos y marchitez bacteriana; efecto de concentración de plagas
+tomate,chile_jalapeño,antagonismo,-1,comparten_plagas,investigado,CABI; FAO; Solanaceae pest lists,Comparten toda la familia de plagas Solanaceae; evitar intercalar en mismo bancal
+tomate,chile_habanero,antagonismo,-1,comparten_plagas,investigado,CABI; Solanaceae pest biology,Igual que tomate-jalapeño; riesgo de plaga compartida y enfermedad viral
+berenjena,chile_jalapeño,antagonismo,-1,comparten_plagas,investigado,CABI Compendium; extension literature,Tres Solanaceae juntas concentran plagas; uso posible solo como trampa deliberada
+pepino,calabaza,antagonismo,-1,comparten_plagas,investigado,CABI Cucurbitaceae; UF/IFAS; extension,Ambas Cucurbitaceae; comparten escarabajo del pepino; mosca de la fruta y powdery mildew
+pepino,ayote,antagonismo,-1,comparten_plagas,investigado,CABI; UF/IFAS Cucurbit IPM,Misma familia; evitar juntas para no concentrar Cucurbit leaf crumple virus y escarabajo rayado
+tagetes,tomate,sinergia,2,repele_plagas;alelopatia,investigado,PMC Limonene Study 2019; ScienceDirect Nematodes,Par más documentado de companion planting; Tagetes patula más efectiva que T. erecta para mosca blanca
+calendula,tomate,sinergia,1,repele_plagas,investigado,Multiple companion planting reviews; ResearchGate,Atrae polinizadores; cierta represión de plagas; evidencia más débil que tagetes
+capuchina,pepino,sinergia,2,planta_trampa;repele_plagas,investigado,Laidback Gardener; Epic Gardening; Gardening Know How,Capuchina atrae áfidos como trampa y repele escarabajo del pepino; documentado en múltiples fuentes
+capuchina,tomate,sinergia,1,planta_trampa,investigado,Laidback Gardener; Epic Gardening,Trampa para áfidos y mosca blanca; alejar 1-1.5 m del tomate para máxima efectividad
+girasol,maiz,sinergia,1,atrae_polinizadores,investigado,Organic Gardening 101; Companion planting reviews,Girasol atrae polinizadores que benefician todo el huerto; plantar en bordes del maíz
+girasol,frijol_negro,antagonismo,-2,alelopatia,investigado,PSU Extension Allelopathy; Blooming Backyard; Organic Gardening 101,Raíces del girasol secretan aloquímicos que inhiben frijol; efecto documentado en múltiples experimentos
+girasol,pepino,antagonismo,-1,alelopatia,investigado,Community Roots Ohio; Blooming Backyard,Alelopatía del girasol puede afectar pepino; evitar plantación cercana
+girasol,calabaza,sinergia,1,atrae_polinizadores,investigado,Organic Gardening 101; Blooming Backyard,Calabaza tolera bien la alelopatía del girasol; girasol atrae polinizadores benéficos para calabaza
+frijol_negro,maiz,sinergia,2,fijacion_N,investigado,Springer Nitrogen Fixation Milpa; PMC Root Foraging,Frijol fija N atmosférico que enriquece suelo del maíz; relación simbiótica documentada científicamente
+mucuna,maiz,sinergia,2,fijacion_N;cobertura_suelo,investigado,CGIAR Nitrogen Fixation; Maxapress Mucuna Review,Mucuna como relevo o borde del maíz; fija 150-200 kg N/ha y suprime malezas; muy documentado en trópico
+crotalaria,tomate,sinergia,1,alelopatia,investigado,Frontiers Agronomy; CABI Crotalaria,Crotalaria como cultivo previo reduce nematodos en suelo para posterior siembra de tomate
+canavalia,maiz,sinergia,1,fijacion_N;cobertura_suelo,investigado,ECHO Community; CABI Canavalia,Canavalia intercalada con maíz en trópico; documentado en Africa y Latinoamérica tropical
+gandul,maiz,sinergia,2,fijacion_N;sombra,investigado,Springer Nitrogen Fixation; Frontiers Agronomy; PFAF,Gandul fija N y provee sombra lateral; sistema leguminosa-gramínea clásico del trópico
+epazote,frijol_negro,sinergia,1,repele_plagas,investigado,PVAMU Fact Sheet; Gardening Know How; Mesoamerican tradition,Epazote es planta compañera tradicional del frijol en México; repele gorgojos y reduce plagas; distancia >30 cm
+albahaca,chile_jalapeño,sinergia,1,repele_plagas,investigado,Companion planting guides; UF/IFAS,Albahaca repele áfidos y mosca blanca en chile; mismo mecanismo que con tomate pero menos documentado

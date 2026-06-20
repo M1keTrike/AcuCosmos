@@ -1,0 +1,17 @@
+# Entorno / cachés Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Snapshots / binarios de entrega (ruido, no es código)
+233371/
+233371.zip
+outputs.rar
+
+# Salidas generadas por las corridas (se regeneran)
+resultados/
+
+# IDE / SO / herramientas locales
+.DS_Store
+.claude/

@@ -1,0 +1,10 @@
+id,tipo,descripcion,area_m2,profundidad_m,volumen_m3,capacidad_carga_kg_m3,recambio_agua,costo_usd,capacidad_notas,fuente
+estanque_tierra_pequeno,estanque_tierra,Estanque de tierra familiar semi-intensivo,200,1.2,240,2.0,5-10% semanal,800,~2-5 kg/m2; equivalente 10-20 t/ha/ano con manejo,FAO-pond
+estanque_tierra_grande,estanque_tierra,Estanque de tierra comercial semi-intensivo,1000,1.5,1500,1.5,5% semanal,3500,15-30 kg/m3 extensivo-semiintensivo (FAO); aqui conservador,FAO-pond
+tanque_geomembrana,tanque,"Tanque revestido con geomembrana, control de calidad de agua",50,1.2,60,8.0,10-20% diario,1200,Mayor densidad por recambio; requiere aireacion,Manual-acuicola
+tanque_circular_concreto,tanque,Tanque circular de concreto con aireacion,28,1.2,34,15.0,alto con aireacion,2000,Intensivo; 10-20 kg/m3 con buen manejo,Manual-acuicola
+jaula_flotante,jaula,Jaula flotante en cuerpo de agua (embalse o laguna),6,1.5,9,30.0,continuo (cuerpo de agua),600,Alta densidad por flujo del cuerpo de agua,FAO-cage
+sistema_biofloc,biofloc,Tanque biofloc con manejo de comunidad microbiana,20,1.5,30,20.0,"minimo (<10%), reposicion por evaporacion",2500,15-30 kg/m3; recicla N in situ,ResearchGate-biofloc
+raceway,raceway,Canal de flujo continuo (raceway) de alta densidad,30,1.0,30,50.0,continuo alto,4000,40-80 kg/m3; ideal para trucha y bagre,FAO-raceway
+estanque_revestido_mediano,estanque_revestido,Estanque revestido mediano semi-intensivo,400,1.3,520,3.0,10% semanal,2500,Control intermedio de calidad de agua,Manual-acuicola
+tanque_RAS,RAS,Sistema de recirculacion (RAS) con biofiltro,10,1.5,15,60.0,recirculacion + biofiltro (recambio <5%),8000,50-80 kg/m3; maxima intensidad y control,FAO-RAS
