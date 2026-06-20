@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Dict, List, Optional, Tuple
 
 from src.metricas import evaluar_aptitud, ContextoEvaluacion
+from src.agregacion import puntuar_seleccion
 from src.operadores import (
     FuncionInicializacion, SeleccionTorneo, CruzaUniforme,
     FuncionMutacion, CopiarIndividuo
@@ -38,6 +39,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
         f, m = evaluar_aptitud(ind, ctx)
         aptitudes.append(f)
         metricas_list.append(m)
+    # aptitud de SELECCION (suma_* -> = aptitudes; pareto/borda -> rangos)
+    scores = puntuar_seleccion(aptitudes, metricas_list, esquema.agregacion)
 
     historial: List[Dict] = []
     mejor_global_idx = int(np.argmax(aptitudes))
@@ -97,8 +100,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
         ctx.generacion = g + 1
         hijos: List[Dict] = []
         while len(hijos) < tam_poblacion:
-            padre_a = SeleccionTorneo(poblacion, aptitudes, t=t_torneo)
-            padre_b = SeleccionTorneo(poblacion, aptitudes, t=t_torneo)
+            padre_a = SeleccionTorneo(poblacion, scores, t=t_torneo)
+            padre_b = SeleccionTorneo(poblacion, scores, t=t_torneo)
             h1, h2 = CruzaUniforme(padre_a, padre_b, catalogo, tanques, esquema,
                                    tanques_permitidos=tanques_permitidos)
             h1 = FuncionMutacion(h1, catalogo, tanques, esquema,
@@ -119,6 +122,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
         combinados = poblacion + hijos
         combinadas_apt = list(aptitudes) + apt_hijos
         combinadas_met = list(metricas_list) + met_hijos
+        combinadas_scores = puntuar_seleccion(combinadas_apt, combinadas_met,
+                                              esquema.agregacion)
 
         apt_mejor = float(max(combinadas_apt))
         apt_peor = float(min(combinadas_apt))
@@ -141,7 +146,7 @@ def EjecutarAG(ctx: ContextoEvaluacion,
         })
 
         orden = sorted(range(len(combinados)),
-                       key=lambda k: combinadas_apt[k], reverse=True)
+                       key=lambda k: combinadas_scores[k], reverse=True)
         sel = orden[:tam_poblacion]
         poblacion = [combinados[k] for k in sel]
         aptitudes = [combinadas_apt[k] for k in sel]
@@ -178,6 +183,9 @@ def EjecutarAG(ctx: ContextoEvaluacion,
                     metricas_list[pos] = m_n
                 _actualizar_hall(nuevos, nuevas_apt, nuevas_met)
                 sin_factibles = 0
+
+        # recomputa la aptitud de seleccion sobre la poblacion superviviente
+        scores = puntuar_seleccion(aptitudes, metricas_list, esquema.agregacion)
 
         if apt_mejor > mejor_global_apt + 1e-9:
             mejor_global_apt = apt_mejor

@@ -319,6 +319,10 @@ def evaluar_aptitud(individuo, ctx):
     esquema mas costo / n_especies / factible.
     """
     esquema = ctx.esquema
+    # Vector de objetivos (_obj) y violacion total (_viol) solo se necesitan para
+    # agregaciones multiobjetivo (pareto/borda/nsga3); en modos de suma se omiten
+    # para no anadir trabajo (peces queda identico).
+    necesita_obj = esquema.agregacion not in ("suma_simple", "suma_normalizada")
     activas = EspeciesActivas(individuo)
     met = {}
     if not activas:
@@ -327,16 +331,22 @@ def evaluar_aptitud(individuo, ctx):
         met["costo"] = 0
         met["factible"] = False
         met["n_especies"] = 0
+        if necesita_obj:
+            met["_obj"] = tuple(0.0 for _ in esquema.metricas)
+            met["_viol"] = float("inf")
         return 0.0, met
 
     norm_on = esquema.agregacion == "suma_normalizada"
     F_obj = 0.0
+    obj = []
     for mc in esquema.metricas:
         raw = REGISTRO_METRICAS[mc.nombre](individuo, ctx, mc.params)
         trans = _transform(raw, mc.params)
         val = _normalizar(trans, mc.params) if norm_on else trans
         F_obj += mc.signo * mc.peso * val
         met[mc.clave_reporte] = raw if mc.reporte == "raw" else mc.peso * trans
+        if necesita_obj:
+            obj.append(mc.signo * trans)   # orientado a maximizar
 
     costo = costo_total(individuo, ctx)
     met["costo"] = costo
@@ -345,6 +355,10 @@ def evaluar_aptitud(individuo, ctx):
     violado = any(_viola_restriccion(r, individuo, ctx, met, costo)
                   for r in esquema.restricciones)
     met["factible"] = not violado
+    if necesita_obj:
+        met["_obj"] = tuple(obj)
+        met["_viol"] = sum(_magnitud_violacion(r, individuo, ctx, met, costo)
+                           for r in esquema.restricciones)
 
     modo = esquema.penalizaciones.get("modo", "mortal")
     if modo == "mortal":
