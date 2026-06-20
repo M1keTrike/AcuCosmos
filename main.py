@@ -1,11 +1,14 @@
 import os
+import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from src.ga_acucosmos import EjecutarAG
-from src.esquema import cargar_esquema
+from src.esquema import cargar_esquema, cargar_tablas, cargar_escenarios
 from src.metricas import REGISTRO_METRICAS, ContextoEvaluacion, evaluar_aptitud
 from src.visualizacion import ResumenEscenario
+from src.visualizacion_generica import resumen_dominio
+from src.cromosoma import EspeciesActivas
 
 MOSTRAR_GRAFICAS = True
 RUTA_ESQUEMA = 'config/peces_ornamental.yaml'
@@ -141,5 +144,70 @@ def main():
         plt.show()
 
 
+def ejecutar_dominio(ruta_config, nombre_escenario=None, dir_salida='resultados',
+                     seed=None, generaciones=150, poblacion=80, mostrar=False):
+    """Corre CUALQUIER dominio (config YAML) en uno o todos sus escenarios y
+    guarda graficas/tablas genericas en resultados/<dominio>/."""
+    esquema = cargar_esquema(ruta_config, REGISTRO_METRICAS)
+    catalogo, sitios, kappa = cargar_tablas(esquema)
+    escenarios = cargar_escenarios(esquema)
+    if nombre_escenario:
+        escenarios = [e for e in escenarios
+                      if str(e.get('nombre')) == nombre_escenario]
+        if not escenarios:
+            raise SystemExit(f"escenario '{nombre_escenario}' no existe")
+
+    print(f"Dominio: {esquema.dominio} | {len(catalogo)} especies, "
+          f"{len(sitios)} sitios | agregacion={esquema.agregacion}")
+    salida = []
+    for e in escenarios:
+        ctx = ContextoEvaluacion(esquema, catalogo, sitios, kappa, e)
+        print(f"\n=== {esquema.dominio} / {e['nombre']} ===")
+        mejor, hist, top_inds, top_apts, top_mets = EjecutarAG(
+            ctx, tanques_permitidos=e.get('sitios_permitidos'),
+            tam_poblacion=poblacion, generaciones_max=generaciones,
+            min_especies=int(e.get('min_especies', 3)),
+            max_especies=int(e.get('max_especies', 15)),
+            verbose=True, seed=seed)
+        f, m = evaluar_aptitud(mejor, ctx)
+        nom = ('nombre_comun' if 'nombre_comun' in catalogo.columns
+               else esquema.id_col)
+        sp = [f"{catalogo.iloc[i][nom]} x{int(mejor['C'][i])}"
+              for i in EspeciesActivas(mejor)]
+        print(f"  Mejor: F={f:.4f} factible={m['factible']} "
+              f"n_sp={m['n_especies']} costo={m['costo']:.2f} "
+              f"carga={m.get('carga')}")
+        print("  Ensamblaje:", ", ".join(sp))
+        out = os.path.join(dir_salida, esquema.dominio)
+        res = resumen_dominio(esquema, mejor, hist, top_inds, top_apts, top_mets,
+                              catalogo, out, nombre=e['nombre'], mostrar=mostrar)
+        salida.append((e['nombre'], mejor, m, res))
+    return salida
+
+
+def _cli():
+    ap = argparse.ArgumentParser(
+        description="AcuCosmos — framework de ensamblajes multi-dominio")
+    ap.add_argument('--dominio',
+                    help="nombre o ruta del config (p.ej. arboles_bosque o "
+                         "config/arboles_bosque.yaml). Sin esto: demo peces.")
+    ap.add_argument('--escenario', default=None,
+                    help="nombre del escenario; por defecto, todos")
+    ap.add_argument('--seed', type=int, default=None)
+    ap.add_argument('--generaciones', type=int, default=150)
+    ap.add_argument('--poblacion', type=int, default=80)
+    ap.add_argument('--no-graficas', action='store_true')
+    args = ap.parse_args()
+    if not args.dominio:
+        main()                       # demo retrocompatible (peces, 3 escenarios)
+        return
+    ruta = args.dominio
+    if not ruta.endswith('.yaml'):
+        ruta = os.path.join('config', f"{ruta}.yaml")
+    ejecutar_dominio(ruta, args.escenario, seed=args.seed,
+                     generaciones=args.generaciones, poblacion=args.poblacion,
+                     mostrar=not args.no_graficas)
+
+
 if __name__ == '__main__':
-    main()
+    _cli()

@@ -199,6 +199,62 @@ Por cada escenario se generan en `resultados/`:
 
 ---
 
+## Framework multi-dominio (extensión)
+
+Sobre la rama `feature/framework-multidominio`, AcuCosmos se generaliza a un
+**framework de diseño de ensamblajes biológicos**: el **mismo motor genético**
+resuelve cinco dominios a partir de **datos (CSV) + un archivo de configuración
+YAML**, sin tocar el motor (patrón Strategy + Registry; filosofía DEAP).
+
+| Dominio | Config | Objetivo |
+|---|---|---|
+| `peces_ornamental` | `config/peces_ornamental.yaml` | acuario estético (el AcuCosmos original, idéntico) |
+| `plantas_jardin` | `config/plantas_jardin.yaml` | huerto/companion planting (valor + polinizadores + sinergia) |
+| `arboles_bosque` | `config/arboles_bosque.yaml` | reforestación (CO₂ por alometría + biodiversidad + facilitación) |
+| `fauna_acuicola` | `config/fauna_acuicola.yaml` | policultivo productivo (biomasa·valor + equilibrio ecológico) |
+| `fauna_terrestre` | `config/fauna_terrestre.yaml` | integración cultivo‑ganado (producción + sinergias) |
+
+**Piezas nuevas** (todas fuera del motor): `src/esquema.py` (`EsquemaDominio` +
+`cargar_esquema`/`cargar_tablas`/`cargar_escenarios`), `src/metricas.py` (registro
+de métricas `nombre→callable`, `ContextoEvaluacion`, evaluador genérico con
+penalización mortal/graduada/dinámica y normalización), `src/agregacion.py`
+(suma / NSGA‑II con dominancia‑con‑restricciones de Deb / Borda / esqueleto
+NSGA‑III), `src/heuristicas.py` (cargador disperso→denso + heurísticas H1..Hn) y
+`src/visualizacion_generica.py`. Las bases de conocimiento por dominio están en
+`kb/<dominio>/`.
+
+### Correr un dominio
+
+```bash
+python main.py                                   # demo peces (3 escenarios, idéntico al original)
+python main.py --dominio arboles_bosque          # todos los escenarios del dominio
+python main.py --dominio fauna_acuicola --escenario policultivo_calido --seed 7
+```
+
+Salidas genéricas en `resultados/<dominio>/`: evolución de aptitud, evolución de
+métricas, distribución por estratos (respeta el nº de estratos del dominio) y
+tablas Top‑K.
+
+### Receta: añadir un dominio nuevo (sin tocar el motor)
+
+1. Coloca los CSV en `kb/<dominio>/`: catálogo de especies, sitios (capacidad +
+   costo), interacciones (lista dispersa de pares `especie_a,especie_b,valor`
+   en `[-2,+2]`) y escenarios (refs ambientales + presupuesto + sitios + rango).
+2. Copia `config/_plantilla.yaml` a `config/<dominio>.yaml` y rellena: `rutas`,
+   `id_col`, `rasgos` (papel del motor → columna; `null` si ausente), `estratos`
+   (`col`/`orden`/`kernel`), `ejes_ambientales`, `metricas` (cada una por su
+   nombre en el registro + `peso`/`signo`/`clave_reporte`/`params`),
+   `restricciones`, `penalizaciones`, `agregacion` y `params` (formato de
+   interacciones, `escala_origen`, `columnas_derivadas`).
+3. Si necesitas una **métrica** o **heurística** nuevas, regístralas con
+   `@metrica` en `src/metricas.py` o `@regla` en `src/heuristicas.py`.
+4. Ejecuta `python main.py --dominio <dominio>`.
+
+Decisiones de diseño, validación del YAML y simplificaciones conocidas: ver
+`INFORME_REFACTOR.md`.
+
+---
+
 ##  Stack técnico
 
 - **Python** — lenguaje principal
