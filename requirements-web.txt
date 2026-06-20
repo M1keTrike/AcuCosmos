@@ -1,0 +1,5 @@
+# Backend web (GUI en vivo) — se instala ADEMAS de requirements.txt.
+# El motor (numpy/pandas) ya esta en requirements.txt.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+sse-starlette>=2.0

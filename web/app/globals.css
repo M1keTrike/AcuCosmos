@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  --background: #060912;
+  --foreground: #e8eef7;
+  --panel: #0d1424;
+  --panel-2: #111a2e;
+  --borde: #1e2a44;
+  --muted: #8aa0c0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-borde: var(--borde);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(1200px 700px at 80% -10%, rgba(56, 189, 248, 0.08), transparent 60%),
+    radial-gradient(900px 600px at 10% 110%, rgba(34, 197, 94, 0.06), transparent 55%),
+    var(--background);
+}
+
+/* Scrollbar discreto y oscuro */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--borde) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--borde);
+  border-radius: 9px;
+}
+
+/* Animaciones ambientales reutilizables */
+@keyframes flotar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes brillar {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@keyframes deriva-burbuja {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  20% { opacity: 0.5; }
+  100% { transform: translateY(-120px) scale(1.1); opacity: 0; }
+}
+
+.tarjeta {
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 1px solid var(--borde);
+  border-radius: 18px;
+}
+
+.titulo-grad {
+  background: linear-gradient(90deg, #38bdf8, #22d3ee 40%, #34d399 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.boton-acento {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.boton-acento:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.boton-acento:active {
+  transform: translateY(0);
+}
+.boton-acento:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}

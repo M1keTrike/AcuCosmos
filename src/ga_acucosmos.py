@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from src.metricas import evaluar_aptitud, ContextoEvaluacion
 from src.agregacion import puntuar_seleccion
@@ -20,8 +20,12 @@ def EjecutarAG(ctx: ContextoEvaluacion,
                max_especies: int = 15,
                top_k: int = 3,
                verbose: bool = True,
-               seed: Optional[int] = None
+               seed: Optional[int] = None,
+               callback: Optional[Callable[[Dict, Dict], None]] = None
                ) -> Tuple[Dict, List[Dict], List[Dict], List[float], List[Dict]]:
+    # `callback(registro_historial, mejor_individuo_de_la_gen)` se invoca tras cada
+    # generacion (gen 0 incluida) para transmitir el AG en vivo. Default None =>
+    # camino byte-identico (golden output intacto): es extender, no modificar.
     if seed is not None:
         np.random.seed(seed)
     catalogo = ctx.catalogo
@@ -94,6 +98,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
     if verbose:
         print(_linea_verbose(0, historial[0]['apt_mejor'],
                              historial[0]['apt_promedio'], m_init))
+    if callback:
+        callback(historial[0], mejor_global)
 
     sin_factibles = 0
     REINICIO_TRAS = 15
@@ -135,6 +141,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
         m_mejor = combinadas_met[mejor_idx_pre]
 
         historial.append(_hist_reg(g + 1, apt_mejor, apt_peor, apt_prom, m_mejor))
+        if callback:
+            callback(historial[-1], combinados[mejor_idx_pre])
 
         orden = sorted(range(len(combinados)),
                        key=lambda k: combinadas_scores[k], reverse=True)
