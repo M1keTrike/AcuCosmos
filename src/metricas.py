@@ -51,6 +51,7 @@ class ContextoEvaluacion:
     matriz_kappa: np.ndarray
     escenario: dict              # refs ambientales + presupuesto + max_especies
     generacion: int = 0
+    generaciones_max: int = 1    # G, para penalizacion dinamica w(g)=w0(1+alpha*g/G)
     _pos_estr: Optional[dict] = field(default=None, repr=False)
 
     def col(self, rol):
@@ -254,22 +255,67 @@ def _transform(v, params):
     return t
 
 
+def _normalizar(v, params):
+    """Normalizacion declarada a [0,1] via params['norm']={'min','max'} (3.2).
+
+    Sin 'norm' declarado devuelve v sin cambios. La usa la agregacion
+    'suma_normalizada' para poner objetivos de escalas dispares en rango comun
+    (corrige el sesgo donde el objetivo de numeros grandes domina).
+    """
+    norm = params.get("norm")
+    if not norm:
+        return v
+    lo, hi = float(norm["min"]), float(norm["max"])
+    if hi <= lo:
+        return v
+    return min(max((v - lo) / (hi - lo), 0.0), 1.0)
+
+
 def _viola_restriccion(r, individuo, ctx, met, costo):
+    """Booleano EXACTO (mismas comparaciones que la death-penalty de Fase 1)."""
     if r.tipo == "ambiental":
         ok, _ = ejes_factibles(individuo, ctx)
         return not ok
     if r.tipo == "presupuesto":
         pres = ctx.escenario.get("presupuesto")
         return pres is not None and costo > pres
-    # capacidad / espacio: comparan una clave de metricas con un umbral
     return _OPS[r.op](met.get(r.clave), r.umbral)
+
+
+def _magnitud_violacion(r, individuo, ctx, met, costo):
+    """Magnitud (>=0) de la violacion, para penalizacion graduada [1-4]."""
+    if r.tipo == "ambiental":
+        _ok, viol = ejes_factibles(individuo, ctx)
+        return viol
+    if r.tipo == "presupuesto":
+        pres = ctx.escenario.get("presupuesto")
+        if pres is None or pres <= 0:
+            return 0.0
+        return max(0.0, costo / pres - 1.0)
+    val = met.get(r.clave)
+    if r.op in (">=", ">"):
+        return max(0.0, val - r.umbral)
+    return max(0.0, r.umbral - val)
+
+
+def _peso_penalizacion(r, esquema, ctx, modo):
+    """Peso de la restriccion; en modo dinamico crece con la generacion:
+    w(g) = w0 * (1 + alpha * g / G)  ([1], [2])."""
+    pesos = esquema.penalizaciones.get("pesos", {})
+    w0 = float(pesos.get(r.tipo, r.peso))
+    if modo == "dinamica":
+        alpha = float(esquema.penalizaciones.get("dinamica_alpha", 0.0))
+        G = max(int(getattr(ctx, "generaciones_max", 1)), 1)
+        return w0 * (1.0 + alpha * int(ctx.generacion) / G)
+    return w0
 
 
 def evaluar_aptitud(individuo, ctx):
     """Evaluador generico dirigido por el EsquemaDominio.
 
-    Fase 1: agregacion `suma_simple` + penalizacion `mortal` (reproduce la
-    death-penalty). Devuelve (F_total, metricas) con las claves de reporte del
+    Agregacion: `suma_simple` | `suma_normalizada` (3.2).
+    Penalizacion:  `mortal` (death-penalty, reproduce Fase 1) | `graduada` |
+    `dinamica` (3.1). Devuelve (F_total, metricas) con las claves de reporte del
     esquema mas costo / n_especies / factible.
     """
     esquema = ctx.esquema
@@ -283,28 +329,34 @@ def evaluar_aptitud(individuo, ctx):
         met["n_especies"] = 0
         return 0.0, met
 
-    F = 0.0
+    norm_on = esquema.agregacion == "suma_normalizada"
+    F_obj = 0.0
     for mc in esquema.metricas:
         raw = REGISTRO_METRICAS[mc.nombre](individuo, ctx, mc.params)
         trans = _transform(raw, mc.params)
-        F += mc.signo * mc.peso * trans
+        val = _normalizar(trans, mc.params) if norm_on else trans
+        F_obj += mc.signo * mc.peso * val
         met[mc.clave_reporte] = raw if mc.reporte == "raw" else mc.peso * trans
 
     costo = costo_total(individuo, ctx)
     met["costo"] = costo
     met["n_especies"] = len(activas)
-    met["factible"] = True
 
-    modo = esquema.penalizaciones.get("modo", "mortal")
     violado = any(_viola_restriccion(r, individuo, ctx, met, costo)
                   for r in esquema.restricciones)
+    met["factible"] = not violado
+
+    modo = esquema.penalizaciones.get("modo", "mortal")
     if modo == "mortal":
         if violado:
-            met["factible"] = False
             return 0.0, met
-        return float(F), met
+        return float(F_obj), met
 
-    # Modos graduada/dinamica: Fase 2 (se implementaran sobre este mismo punto).
-    if violado:
-        met["factible"] = False
-    return float(F), met
+    # graduada / dinamica: F = objetivos - penalizacion proporcional a la violacion.
+    # Conserva las penalizaciones blandas (N_c, M_s_hat) que ya van en F_obj.
+    pen = 0.0
+    for r in esquema.restricciones:
+        mag = _magnitud_violacion(r, individuo, ctx, met, costo)
+        if mag > 0:
+            pen += _peso_penalizacion(r, esquema, ctx, modo) * mag
+    return float(F_obj - pen), met

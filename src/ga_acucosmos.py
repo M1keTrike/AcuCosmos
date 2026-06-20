@@ -26,6 +26,7 @@ def EjecutarAG(ctx: ContextoEvaluacion,
     catalogo = ctx.catalogo
     tanques = ctx.sitios
     esquema = ctx.esquema
+    ctx.generaciones_max = generaciones_max
     poblacion = FuncionInicializacion(
         tam_poblacion, catalogo, tanques, esquema,
         min_especies=min_especies, max_especies=max_especies,
