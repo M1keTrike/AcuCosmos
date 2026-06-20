@@ -11,7 +11,7 @@ Nota: la coherencia documentada incluye "D > 0 si activa", pero la reparacion
 solo garantiza la *normalizacion* (suma 1), no la positividad estricta: la
 mutacion `p_m4` puede dejar en 0 la proporcion de una activa y la reparacion no
 la corrige. Por eso aqui se exige D >= 0 (comportamiento real, no se altera en
-Fase 0 para no romper la reproducibilidad del golden output).
+Fase 0/1 para no romper la reproducibilidad del golden output).
 """
 import numpy as np
 import pytest
@@ -19,6 +19,8 @@ import pytest
 from src.operadores import (FuncionInicializacion, FuncionReparacion,
                             FuncionMutacion, CruzaUniforme)
 from src.cromosoma import EspeciesActivas, CrearIndividuoVacio
+from src.esquema import cargar_esquema
+from src.metricas import REGISTRO_METRICAS
 from tests.golden_lib import cargar_peces, SEED
 
 
@@ -27,13 +29,19 @@ def datos():
     return cargar_peces()
 
 
-def _check_invariantes(ind, catalogo, n_tanques):
+@pytest.fixture(scope="module")
+def esquema():
+    return cargar_esquema("config/peces_ornamental.yaml", REGISTRO_METRICAS)
+
+
+def _check_invariantes(ind, catalogo, esquema, n_tanques):
     activas = EspeciesActivas(ind)
     assert len(activas) >= 1
     assert 0 <= ind["tanque"] < n_tanques
+    col_min = esquema.col("min_agrupacion")
     for i in range(len(ind["B"])):
         if ind["B"][i] == 1:
-            c_min = max(int(catalogo.iloc[i]["min_cardumen"]), 1)
+            c_min = max(int(catalogo.iloc[i][col_min]), 1) if col_min else 1
             assert ind["C"][i] >= c_min
             assert ind["D"][i] >= 0.0
         else:
@@ -51,16 +59,16 @@ def test_kappa_simetrica_alineada(datos):
     assert np.all(kappa >= -1.0) and np.all(kappa <= 1.0)
 
 
-def test_inicializacion_invariantes(datos):
+def test_inicializacion_invariantes(datos, esquema):
     catalogo, tanques, _kappa = datos
     np.random.seed(SEED)
-    pob = FuncionInicializacion(50, catalogo, tanques,
+    pob = FuncionInicializacion(50, catalogo, tanques, esquema,
                                 min_especies=3, max_especies=15)
     for ind in pob:
-        _check_invariantes(ind, catalogo, len(tanques))
+        _check_invariantes(ind, catalogo, esquema, len(tanques))
 
 
-def test_reparacion_corrige_individuo_roto(datos):
+def test_reparacion_corrige_individuo_roto(datos, esquema):
     catalogo, tanques, _kappa = datos
     n = len(catalogo)
     ind = CrearIndividuoVacio(n)
@@ -73,35 +81,35 @@ def test_reparacion_corrige_individuo_roto(datos):
     ind["B"][20] = 1
     ind["C"][20] = 9
     ind["D"][20] = 0.5                        # D sin normalizar
-    FuncionReparacion(ind, catalogo, tanques)
-    _check_invariantes(ind, catalogo, len(tanques))
+    FuncionReparacion(ind, catalogo, tanques, esquema)
+    _check_invariantes(ind, catalogo, esquema, len(tanques))
 
 
-def test_reparacion_garantiza_una_activa(datos):
+def test_reparacion_garantiza_una_activa(datos, esquema):
     catalogo, tanques, _kappa = datos
     np.random.seed(SEED)
     ind = CrearIndividuoVacio(len(catalogo))  # cero activas
-    FuncionReparacion(ind, catalogo, tanques)
+    FuncionReparacion(ind, catalogo, tanques, esquema)
     assert len(EspeciesActivas(ind)) >= 1
-    _check_invariantes(ind, catalogo, len(tanques))
+    _check_invariantes(ind, catalogo, esquema, len(tanques))
 
 
-def test_mutacion_preserva_invariantes(datos):
+def test_mutacion_preserva_invariantes(datos, esquema):
     catalogo, tanques, _kappa = datos
     np.random.seed(SEED)
-    pob = FuncionInicializacion(30, catalogo, tanques,
+    pob = FuncionInicializacion(30, catalogo, tanques, esquema,
                                 min_especies=3, max_especies=15)
     for ind in pob:
-        m = FuncionMutacion(ind, catalogo, tanques)
-        _check_invariantes(m, catalogo, len(tanques))
+        m = FuncionMutacion(ind, catalogo, tanques, esquema)
+        _check_invariantes(m, catalogo, esquema, len(tanques))
 
 
-def test_cruza_preserva_invariantes(datos):
+def test_cruza_preserva_invariantes(datos, esquema):
     catalogo, tanques, _kappa = datos
     np.random.seed(SEED)
-    pob = FuncionInicializacion(30, catalogo, tanques,
+    pob = FuncionInicializacion(30, catalogo, tanques, esquema,
                                 min_especies=3, max_especies=15)
     for a, b in zip(pob[::2], pob[1::2]):
-        h1, h2 = CruzaUniforme(a, b, catalogo, tanques)
-        _check_invariantes(h1, catalogo, len(tanques))
-        _check_invariantes(h2, catalogo, len(tanques))
+        h1, h2 = CruzaUniforme(a, b, catalogo, tanques, esquema)
+        _check_invariantes(h1, catalogo, esquema, len(tanques))
+        _check_invariantes(h2, catalogo, esquema, len(tanques))

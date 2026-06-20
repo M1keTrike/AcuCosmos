@@ -12,10 +12,12 @@ import numpy as np
 import pandas as pd
 
 from src.ga_acucosmos import EjecutarAG
-from src.aptitud import FuncionAptitud
+from src.esquema import cargar_esquema
+from src.metricas import REGISTRO_METRICAS, ContextoEvaluacion, evaluar_aptitud
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIR_GOLDEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "golden")
+RUTA_ESQUEMA_PECES = os.path.join(RAIZ, "config", "peces_ornamental.yaml")
 
 # Semilla fija de la línea base. No cambiar sin regenerar el golden output.
 SEED = 12345
@@ -64,23 +66,27 @@ def _num(v):
     return v
 
 
+def construir_ctx_peces(cfg):
+    """Construye el EsquemaDominio de peces + ContextoEvaluacion para un escenario."""
+    esquema = cargar_esquema(RUTA_ESQUEMA_PECES, REGISTRO_METRICAS)
+    catalogo, sitios, kappa = cargar_peces()
+    escenario = {"pH_ref": cfg["pH_ref"], "presupuesto": cfg["presupuesto"],
+                 "max_especies": cfg["max_especies"],
+                 "min_especies": cfg["min_especies"]}
+    return ContextoEvaluacion(esquema, catalogo, sitios, kappa, escenario)
+
+
 def correr_escenario(cfg, seed=SEED):
     """Corre un escenario y devuelve una representacion canonica comparable."""
-    catalogo, tanques, kappa = cargar_peces()
+    ctx = construir_ctx_peces(cfg)
     mejor, _hist, top_inds, top_apts, _top_mets = EjecutarAG(
-        catalogo=catalogo, tanques=tanques, matriz_kappa=kappa,
-        pH_ref=cfg["pH_ref"], delta_pH=GA["delta_pH"],
-        presupuesto=cfg["presupuesto"],
-        tanques_permitidos=cfg["tanques_permitidos"],
+        ctx, tanques_permitidos=cfg["tanques_permitidos"],
         tam_poblacion=GA["tam_poblacion"],
         generaciones_max=GA["generaciones_max"],
         estancamiento_max=GA["estancamiento_max"],
         min_especies=cfg["min_especies"], max_especies=cfg["max_especies"],
         top_k=GA["top_k"], verbose=False, seed=seed)
-    f_final, met = FuncionAptitud(
-        mejor, catalogo, tanques, kappa, pH_ref=cfg["pH_ref"],
-        delta_pH=GA["delta_pH"], presupuesto=cfg["presupuesto"],
-        max_especies=cfg["max_especies"])
+    f_final, met = evaluar_aptitud(mejor, ctx)
     claves_cfg = ("nombre", "pH_ref", "presupuesto", "tanques_permitidos",
                   "min_especies", "max_especies")
     return {

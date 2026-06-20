@@ -3,10 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from src.ga_acucosmos import EjecutarAG
-from src.aptitud import FuncionAptitud
+from src.esquema import cargar_esquema
+from src.metricas import REGISTRO_METRICAS, ContextoEvaluacion, evaluar_aptitud
 from src.visualizacion import ResumenEscenario
 
 MOSTRAR_GRAFICAS = True
+RUTA_ESQUEMA = 'config/peces_ornamental.yaml'
 
 
 def CargarDatos(dir_data: str = 'data'):
@@ -20,7 +22,7 @@ def CargarDatos(dir_data: str = 'data'):
     return catalogo, tanques, matriz_kappa
 
 
-def EjecutarEscenario(nombre: str, descripcion: str,
+def EjecutarEscenario(nombre: str, descripcion: str, esquema,
                       catalogo, tanques, matriz_kappa,
                       pH_ref: float, temp_ref: float, presupuesto: float,
                       tanques_permitidos=None,
@@ -32,13 +34,13 @@ def EjecutarEscenario(nombre: str, descripcion: str,
           f"presupuesto=${presupuesto:,.0f} MXN, "
           f"tanques={'todos' if tanques_permitidos is None else tanques_permitidos}")
 
+    escenario = {'pH_ref': pH_ref, 'temp_ref': temp_ref,
+                 'presupuesto': presupuesto, 'max_especies': max_especies,
+                 'min_especies': min_especies}
+    ctx = ContextoEvaluacion(esquema, catalogo, tanques, matriz_kappa, escenario)
+
     mejor, historial, top_inds, top_apts, top_mets = EjecutarAG(
-        catalogo=catalogo,
-        tanques=tanques,
-        matriz_kappa=matriz_kappa,
-        pH_ref=pH_ref,
-        delta_pH=0.5,
-        presupuesto=presupuesto,
+        ctx,
         tanques_permitidos=tanques_permitidos,
         tam_poblacion=80,
         generaciones_max=150,
@@ -47,10 +49,7 @@ def EjecutarEscenario(nombre: str, descripcion: str,
         max_especies=max_especies,
         verbose=True,
     )
-    f_final, metricas = FuncionAptitud(mejor, catalogo, tanques, matriz_kappa,
-                                       pH_ref=pH_ref, delta_pH=0.5,
-                                       presupuesto=presupuesto,
-                                       max_especies=max_especies)
+    f_final, metricas = evaluar_aptitud(mejor, ctx)
 
     print("\n  Mejor global:")
     print(f"    F_total   = {f_final:.4f}")
@@ -86,6 +85,8 @@ def EjecutarEscenario(nombre: str, descripcion: str,
 
 def main():
     catalogo, tanques, matriz_kappa = CargarDatos('data')
+    esquema = cargar_esquema(RUTA_ESQUEMA, REGISTRO_METRICAS)
+    print(f"Dominio:  {esquema.dominio}")
     print(f"Catalogo: {len(catalogo)} especies")
     print(f"Tanques:  {len(tanques)}")
     print(f"Matriz:   {matriz_kappa.shape}")
@@ -98,7 +99,8 @@ def main():
     resultados['E1'] = EjecutarEscenario(
         nombre='escenario_1',
         descripcion='Escenario 1: Acuario comunitario tropical',
-        catalogo=catalogo, tanques=tanques, matriz_kappa=matriz_kappa,
+        esquema=esquema, catalogo=catalogo, tanques=tanques,
+        matriz_kappa=matriz_kappa,
         pH_ref=7.0, temp_ref=25.0, presupuesto=8000.0,
         tanques_permitidos=None,
         dir_salida=dir_salida,
@@ -107,7 +109,8 @@ def main():
     resultados['E2'] = EjecutarEscenario(
         nombre='escenario_2',
         descripcion='Escenario 2: Biotopo amazonico acido',
-        catalogo=catalogo, tanques=tanques, matriz_kappa=matriz_kappa,
+        esquema=esquema, catalogo=catalogo, tanques=tanques,
+        matriz_kappa=matriz_kappa,
         pH_ref=5.5, temp_ref=27.0, presupuesto=12000.0,
         tanques_permitidos=None,
         dir_salida=dir_salida,
@@ -116,7 +119,8 @@ def main():
     resultados['E3'] = EjecutarEscenario(
         nombre='escenario_3',
         descripcion='Escenario 3: Nano-acuario 20L',
-        catalogo=catalogo, tanques=tanques, matriz_kappa=matriz_kappa,
+        esquema=esquema, catalogo=catalogo, tanques=tanques,
+        matriz_kappa=matriz_kappa,
         pH_ref=7.0, temp_ref=24.0, presupuesto=3000.0,
         tanques_permitidos=[0, 1],
         min_especies=2,

@@ -1,0 +1,54 @@
+# Dominio peces_ornamental = el AcuCosmos original (acuario estetico).
+# Config de FIDELIDAD: reproduce F = A_e + I_b + R_v_hat - N_c - M_s_hat + B_div
+# bit a bit (kernel legacy, suma simple, penalizacion mortal, 1 solo eje = pH).
+dominio: peces_ornamental
+
+rutas:
+  catalogo:      data/catalogo_especies.csv
+  sitios:        data/catalogo_tanques.csv
+  interacciones: data/matriz_compatibilidad.csv   # ya densa, valores en [-1, 1]
+  escenarios:    data/escenarios.csv
+id_col: id
+
+rasgos:                          # papel_del_motor: columna_en_el_csv (null si ausente)
+  rareza:            rareza
+  grupo_cromatico:   grupo_cromatico
+  agresividad:       agresividad
+  carga_individuo:   tasa_desechos_ghr      # -> sobrecarga (M_s)
+  capacidad_sitio:   capacidad_filtro_ghr   # (sitios) -> M_s
+  espacio_unidad:    vol_por_individuo_L     # -> comodidad (R_v)
+  capacidad_espacio: volumen_L              # (sitios) -> R_v
+  precio_unidad:     precio_est_MXN
+  costo_sitio:       precio_MXN
+  min_agrupacion:    min_cardumen
+
+estratos:
+  col: estrato
+  orden: [1, 2, 3]               # 3 estratos: Fondo(1) / Medio(2) / Superficie(3)
+  kernel: legacy_peces           # 1.0 / exp(-1) / corte si diff>=2 (identico a hoy)
+
+ejes_ambientales:                # SOLO pH (la temperatura existe pero hoy no se chequea)
+  - { col_min: pH_min, col_max: pH_max, ref: pH_ref, tol: 0.5 }
+
+metricas:                        # F = suma de signo*peso*transform(metrica)
+  - { nombre: estetica_rareza_cromatica, peso: 1.0, signo: 1,  clave_reporte: A_e, reporte: raw, params: { n_grupos_cromaticos: 9 } }
+  - { nombre: biodiversidad_shannon,     peso: 1.0, signo: 1,  clave_reporte: I_b, reporte: raw }
+  - { nombre: comodidad_espacio,         peso: 1.0, signo: 1,  clave_reporte: R_v, reporte: raw, params: { saturacion: 2.0, cap: 1.0 } }
+  - { nombre: conflicto_pares,           peso: 1.0, signo: -1, clave_reporte: N_c, reporte: raw }
+  - { nombre: sobrecarga_capacidad,      peso: 1.0, signo: -1, clave_reporte: M_s, reporte: raw, params: { cap: 1.0 } }
+  - { nombre: bonus_diversidad,          peso: 0.5, signo: 1,  clave_reporte: B_div, reporte: agregado, params: { cap: 1.0 } }
+
+restricciones:                   # modo mortal: cualquier violacion -> F = 0.0
+  - { tipo: capacidad,   clave: M_s, op: ">=", umbral: 1.0 }   # filtro sobrecargado
+  - { tipo: espacio,     clave: R_v, op: "<",  umbral: 1.0 }   # tanque pequeno
+  - { tipo: ambiental }                                        # pH fuera de rango
+  - { tipo: presupuesto }                                      # costo > presupuesto
+
+penalizaciones:
+  modo: mortal                   # graduada/dinamica se activan en Fase 2
+
+agregacion: suma_simple          # suma cruda con pesos explicitos (Fase 1)
+
+params:
+  interacciones_formato: densa
+  escala_origen: [-1, 1]

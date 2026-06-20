@@ -23,10 +23,13 @@ except ImportError:
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.ga_acucosmos import EjecutarAG
-from src.aptitud import FuncionAptitud
+from src.esquema import cargar_esquema
+from src.metricas import REGISTRO_METRICAS, ContextoEvaluacion
 from src.cromosoma import EspeciesActivas
 from src.visualizacion import ResumenEscenario
 from src import operadores
+
+RUTA_ESQUEMA = 'config/peces_ornamental.yaml'
 
 
 GRAPH_TYPES = [
@@ -924,15 +927,25 @@ class AcuCosmosGUI(tk.Tk):
             self.running = False
             self.after(0, lambda: self.btn_run.configure(state='normal'))
 
+    def _obtener_esquema(self):
+        if getattr(self, '_esquema', None) is None:
+            self._esquema = cargar_esquema(RUTA_ESQUEMA, REGISTRO_METRICAS)
+        return self._esquema
+
     def _ejecutar_ag(self, params: Dict, esc: Dict,
                      verbose: bool) -> tuple:
+        # delta_pH ahora vive como tolerancia del eje ambiental en el YAML
+        # (Fase 1); el control delta_pH de la GUI queda inerte hasta la Fase 5.
+        escenario = {
+            'pH_ref': esc['pH_ref'], 'temp_ref': esc.get('temp_ref'),
+            'presupuesto': esc['presupuesto'],
+            'max_especies': esc['max_especies'],
+            'min_especies': esc['min_especies'],
+        }
+        ctx = ContextoEvaluacion(self._obtener_esquema(), self.catalogo,
+                                 self.tanques, self.matriz_kappa, escenario)
         return EjecutarAG(
-            catalogo=self.catalogo,
-            tanques=self.tanques,
-            matriz_kappa=self.matriz_kappa,
-            pH_ref=esc['pH_ref'],
-            delta_pH=params['delta_pH'],
-            presupuesto=esc['presupuesto'],
+            ctx,
             tanques_permitidos=esc['tanques_permitidos'],
             tam_poblacion=params['tam_poblacion'],
             generaciones_max=params['generaciones_max'],

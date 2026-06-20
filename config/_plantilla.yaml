@@ -1,0 +1,56 @@
+# PLANTILLA de EsquemaDominio — copia este archivo a config/<dominio>.yaml y
+# rellena. "Anadir un dominio" = CSVs + este YAML, SIN tocar el motor.
+# Las funciones de metrica viven en src/metricas.py (registro nombre->callable);
+# aqui solo se las invoca por nombre con su peso y signo.
+
+dominio: <nombre_dominio>                 # p.ej. arboles_bosque
+
+rutas:                                    # relativas a la raiz del repo
+  catalogo:      kb/<dom>/<dom>.csv        # catalogo de especies (1 fila por especie)
+  sitios:        kb/<dom>/<dom>_sitios.csv # contenedores/sitios (capacidad + costo)
+  interacciones: kb/<dom>/<dom>_interacciones.csv  # lista dispersa de pares (-2..+2)
+  escenarios:    kb/<dom>/<dom>_escenarios.csv     # refs ambientales + presupuesto + rango
+id_col: id                                # columna identificadora del catalogo
+
+rasgos:                                   # papel_del_motor: columna_csv  (null si ausente)
+  rareza:            null
+  grupo_cromatico:   null
+  agresividad:       null                 # null => el termino se omite
+  carga_individuo:   <col>                # lo que cada individuo consume/aporta -> sobrecarga
+  capacidad_sitio:   <col_en_sitios>      # capacidad del sitio (denominador de la carga)
+  espacio_unidad:    <col>                # espacio/volumen por individuo -> comodidad
+  capacidad_espacio: <col_en_sitios>      # espacio/volumen disponible del sitio
+  precio_unidad:     <col>                # precio por individuo
+  costo_sitio:       <col_en_sitios>      # costo del sitio
+  min_agrupacion:    null                 # minimo de ejemplares por especie (o null)
+
+estratos:                                 # nicho/estrato fisico o trofico
+  col: <col_estrato>
+  orden: [nivel0, nivel1, nivel2, ...]    # define la distancia entre estratos
+  kernel: exp_neg                         # legacy_peces | exp_neg | tabla
+
+ejes_ambientales:                         # factible si ref del escenario in [min-tol, max+tol]
+  - { col_min: <col_min>, col_max: <col_max>, ref: <clave_escenario>, tol: 0.0 }
+
+metricas:                                 # cada 'nombre' debe existir en REGISTRO_METRICAS
+  # reporte: raw (valor crudo) | agregado (peso*transform). params: saturacion/cap, etc.
+  - { nombre: biodiversidad_shannon, peso: 1.0, signo: 1,  clave_reporte: I_b }
+  - { nombre: equilibrio_pares,      peso: 1.0, signo: 1,  clave_reporte: eq_pares }
+  - { nombre: sobrecarga_capacidad,  peso: 1.0, signo: -1, clave_reporte: carga, params: { cap: 1.0 } }
+
+restricciones:                            # tipo: capacidad | espacio | ambiental | presupuesto
+  - { tipo: ambiental }
+  - { tipo: presupuesto }
+  # - { tipo: capacidad, clave: carga, op: ">=", umbral: 1.0 }
+
+penalizaciones:
+  modo: graduada                          # mortal | graduada | dinamica
+  dinamica_alpha: 0.5                      # si modo=dinamica: w(g)=w0*(1+alpha*g/G)
+  pesos: { ambiental: 5.0, capacidad: 5.0, presupuesto: 3.0 }
+
+agregacion: suma_normalizada              # suma_simple | suma_normalizada | pareto_nsga2 | nsga3 | borda
+
+params:
+  interacciones_formato: disperso         # densa | disperso
+  escala_origen: [-2, 2]                   # se reescala a [-1, 1] al cargar (/2)
+  reglas: kb/<dom>/<dom>_reglas.md         # heuristicas H1..Hn para derivar pares

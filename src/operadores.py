@@ -5,8 +5,19 @@ from typing import Dict, List, Tuple
 from src.cromosoma import CrearIndividuoVacio, EspeciesActivas
 
 
+def _cmin(catalogo: pd.DataFrame, esquema, i: int) -> int:
+    """Cardumen/agrupacion minima de la especie i (rol 'min_agrupacion').
+
+    Devuelve 1 si el dominio no declara ese rasgo (columna ausente / None).
+    """
+    col = esquema.col("min_agrupacion")
+    if col is None:
+        return 1
+    return max(int(catalogo.iloc[i][col]), 1)
+
+
 def FuncionInicializacion(tam_poblacion: int, catalogo: pd.DataFrame,
-                          tanques: pd.DataFrame,
+                          tanques: pd.DataFrame, esquema,
                           min_especies: int = 3,
                           max_especies: int = 15,
                           tanques_permitidos: List[int] = None
@@ -25,8 +36,7 @@ def FuncionInicializacion(tam_poblacion: int, catalogo: pd.DataFrame,
         idx_sp = np.random.choice(n_cat, size=k, replace=False)
         ind['B'][idx_sp] = 1
         for i in idx_sp:
-            c_min = int(catalogo.iloc[i]['min_cardumen'])
-            c_min = max(c_min, 1)
+            c_min = _cmin(catalogo, esquema, i)
             ind['C'][i] = int(np.random.randint(c_min, max(c_min + 1, 2 * c_min + 1)))
         alpha = np.ones(k)
         d = np.random.dirichlet(alpha)
@@ -37,7 +47,7 @@ def FuncionInicializacion(tam_poblacion: int, catalogo: pd.DataFrame,
 
 
 def FuncionReparacion(individuo: Dict, catalogo: pd.DataFrame,
-                      tanques: pd.DataFrame,
+                      tanques: pd.DataFrame, esquema,
                       tanques_permitidos: List[int] = None) -> Dict:
     n_cat = len(catalogo)
     n_tanques = len(tanques)
@@ -47,8 +57,7 @@ def FuncionReparacion(individuo: Dict, catalogo: pd.DataFrame,
 
     for i in range(n_cat):
         if individuo['B'][i] == 1:
-            c_min = int(catalogo.iloc[i]['min_cardumen'])
-            c_min = max(c_min, 1)
+            c_min = _cmin(catalogo, esquema, i)
             if individuo['C'][i] < c_min:
                 individuo['C'][i] = c_min
         else:
@@ -59,8 +68,7 @@ def FuncionReparacion(individuo: Dict, catalogo: pd.DataFrame,
     if not activas:
         i = int(np.random.randint(0, n_cat))
         individuo['B'][i] = 1
-        c_min = int(catalogo.iloc[i]['min_cardumen'])
-        individuo['C'][i] = max(c_min, 1)
+        individuo['C'][i] = _cmin(catalogo, esquema, i)
         individuo['D'][i] = 1.0
         activas = [i]
 
@@ -73,25 +81,28 @@ def FuncionReparacion(individuo: Dict, catalogo: pd.DataFrame,
         for i in activas:
             individuo['D'][i] = float(individuo['D'][i]) / suma_d
 
+    # Reasignacion por sobrecarga de capacidad (rol carga vs capacidad del sitio).
+    # Si el dominio no declara esos rasgos, se omite (no hay concepto de carga).
+    col_carga = esquema.col("carga_individuo")
+    col_cap = esquema.col("capacidad_sitio")
     if tanques_permitidos is None:
         tanques_permitidos = list(range(n_tanques))
-    desechos = float(sum(
-        float(catalogo.iloc[i]['tasa_desechos_ghr']) * int(individuo['C'][i])
-        for i in activas
-    ))
-    f_max_actual = float(
-        tanques.iloc[individuo['tanque']]['capacidad_filtro_ghr']
-    )
-    if f_max_actual > 0 and desechos / f_max_actual >= 1.0:
-        candidatos = [
-            (t, float(tanques.iloc[t]['capacidad_filtro_ghr']))
-            for t in tanques_permitidos
-        ]
-        candidatos.sort(key=lambda x: x[1])
-        for t, f in candidatos:
-            if f > 0 and desechos / f < 1.0:
-                individuo['tanque'] = int(t)
-                break
+    if col_carga is not None and col_cap is not None:
+        desechos = float(sum(
+            float(catalogo.iloc[i][col_carga]) * int(individuo['C'][i])
+            for i in activas
+        ))
+        f_max_actual = float(tanques.iloc[individuo['tanque']][col_cap])
+        if f_max_actual > 0 and desechos / f_max_actual >= 1.0:
+            candidatos = [
+                (t, float(tanques.iloc[t][col_cap]))
+                for t in tanques_permitidos
+            ]
+            candidatos.sort(key=lambda x: x[1])
+            for t, f in candidatos:
+                if f > 0 and desechos / f < 1.0:
+                    individuo['tanque'] = int(t)
+                    break
 
     return individuo
 
@@ -117,7 +128,7 @@ def CopiarIndividuo(individuo: Dict) -> Dict:
 
 def CruzaUniforme(padre_a: Dict, padre_b: Dict,
                   catalogo: pd.DataFrame,
-                  tanques: pd.DataFrame,
+                  tanques: pd.DataFrame, esquema,
                   tanques_permitidos: List[int] = None
                   ) -> Tuple[Dict, Dict]:
     n_cat = len(padre_a['B'])
@@ -148,13 +159,15 @@ def CruzaUniforme(padre_a: Dict, padre_b: Dict,
             hijo_2['C'][i] = padre_a['C'][i]
             hijo_2['D'][i] = padre_a['D'][i]
 
-    hijo_1 = FuncionReparacion(hijo_1, catalogo, tanques, tanques_permitidos)
-    hijo_2 = FuncionReparacion(hijo_2, catalogo, tanques, tanques_permitidos)
+    hijo_1 = FuncionReparacion(hijo_1, catalogo, tanques, esquema,
+                               tanques_permitidos)
+    hijo_2 = FuncionReparacion(hijo_2, catalogo, tanques, esquema,
+                               tanques_permitidos)
     return hijo_1, hijo_2
 
 
 def FuncionMutacion(individuo: Dict, catalogo: pd.DataFrame,
-                    tanques: pd.DataFrame,
+                    tanques: pd.DataFrame, esquema,
                     p_m1: float = 0.15, p_m2: float = 0.10,
                     p_m3: float = 0.15, p_m4: float = 0.15,
                     tanques_permitidos: List[int] = None) -> Dict:
@@ -174,8 +187,7 @@ def FuncionMutacion(individuo: Dict, catalogo: pd.DataFrame,
             individuo['D'][i] = 0.0
         else:
             individuo['B'][i] = 1
-            c_min = int(catalogo.iloc[i]['min_cardumen'])
-            individuo['C'][i] = max(c_min, 1)
+            individuo['C'][i] = _cmin(catalogo, esquema, i)
             individuo['D'][i] = 0.05
 
     if np.random.rand() < p_m3:
@@ -198,7 +210,7 @@ def FuncionMutacion(individuo: Dict, catalogo: pd.DataFrame,
             individuo['D'][i] = float(individuo['D'][i]) - eps
             individuo['D'][j] = float(individuo['D'][j]) + eps
 
-    individuo = FuncionReparacion(individuo, catalogo, tanques,
+    individuo = FuncionReparacion(individuo, catalogo, tanques, esquema,
                                   tanques_permitidos)
     return individuo
 

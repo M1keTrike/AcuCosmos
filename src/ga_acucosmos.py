@@ -2,19 +2,14 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Tuple
 
-from src.aptitud import FuncionAptitud
+from src.metricas import evaluar_aptitud, ContextoEvaluacion
 from src.operadores import (
     FuncionInicializacion, SeleccionTorneo, CruzaUniforme,
     FuncionMutacion, CopiarIndividuo
 )
 
 
-def EjecutarAG(catalogo: pd.DataFrame,
-               tanques: pd.DataFrame,
-               matriz_kappa: np.ndarray,
-               pH_ref: float,
-               delta_pH: float = 0.5,
-               presupuesto: Optional[float] = None,
+def EjecutarAG(ctx: ContextoEvaluacion,
                tanques_permitidos: Optional[List[int]] = None,
                tam_poblacion: int = 80,
                generaciones_max: int = 150,
@@ -28,17 +23,18 @@ def EjecutarAG(catalogo: pd.DataFrame,
                ) -> Tuple[Dict, List[Dict], List[Dict], List[float], List[Dict]]:
     if seed is not None:
         np.random.seed(seed)
+    catalogo = ctx.catalogo
+    tanques = ctx.sitios
+    esquema = ctx.esquema
     poblacion = FuncionInicializacion(
-        tam_poblacion, catalogo, tanques,
+        tam_poblacion, catalogo, tanques, esquema,
         min_especies=min_especies, max_especies=max_especies,
         tanques_permitidos=tanques_permitidos
     )
     aptitudes = []
     metricas_list = []
     for ind in poblacion:
-        f, m = FuncionAptitud(ind, catalogo, tanques, matriz_kappa,
-                              pH_ref, delta_pH, presupuesto,
-                              max_especies=max_especies)
+        f, m = evaluar_aptitud(ind, ctx)
         aptitudes.append(f)
         metricas_list.append(m)
 
@@ -97,15 +93,16 @@ def EjecutarAG(catalogo: pd.DataFrame,
     FRAC_REINICIO = 0.5
 
     for g in range(generaciones_max):
+        ctx.generacion = g + 1
         hijos: List[Dict] = []
         while len(hijos) < tam_poblacion:
             padre_a = SeleccionTorneo(poblacion, aptitudes, t=t_torneo)
             padre_b = SeleccionTorneo(poblacion, aptitudes, t=t_torneo)
-            h1, h2 = CruzaUniforme(padre_a, padre_b, catalogo, tanques,
+            h1, h2 = CruzaUniforme(padre_a, padre_b, catalogo, tanques, esquema,
                                    tanques_permitidos=tanques_permitidos)
-            h1 = FuncionMutacion(h1, catalogo, tanques,
+            h1 = FuncionMutacion(h1, catalogo, tanques, esquema,
                                  tanques_permitidos=tanques_permitidos)
-            h2 = FuncionMutacion(h2, catalogo, tanques,
+            h2 = FuncionMutacion(h2, catalogo, tanques, esquema,
                                  tanques_permitidos=tanques_permitidos)
             hijos.append(h1)
             if len(hijos) < tam_poblacion:
@@ -114,9 +111,7 @@ def EjecutarAG(catalogo: pd.DataFrame,
         apt_hijos = []
         met_hijos = []
         for ind in hijos:
-            f, m = FuncionAptitud(ind, catalogo, tanques, matriz_kappa,
-                                  pH_ref, delta_pH, presupuesto,
-                                  max_especies=max_especies)
+            f, m = evaluar_aptitud(ind, ctx)
             apt_hijos.append(f)
             met_hijos.append(m)
 
@@ -161,16 +156,14 @@ def EjecutarAG(catalogo: pd.DataFrame,
             if sin_factibles >= REINICIO_TRAS:
                 n_rein = max(1, int(tam_poblacion * FRAC_REINICIO))
                 nuevos = FuncionInicializacion(
-                    n_rein, catalogo, tanques,
+                    n_rein, catalogo, tanques, esquema,
                     min_especies=min_especies, max_especies=max_especies,
                     tanques_permitidos=tanques_permitidos
                 )
                 nuevas_apt = []
                 nuevas_met = []
                 for ind in nuevos:
-                    f, m = FuncionAptitud(ind, catalogo, tanques, matriz_kappa,
-                                          pH_ref, delta_pH, presupuesto,
-                                          max_especies=max_especies)
+                    f, m = evaluar_aptitud(ind, ctx)
                     nuevas_apt.append(f)
                     nuevas_met.append(m)
                 orden_act = sorted(range(len(poblacion)),
