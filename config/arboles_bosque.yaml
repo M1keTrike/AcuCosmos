@@ -1,0 +1,56 @@
+# Dominio arboles_bosque — reforestacion / agroforesteria tropical.
+dominio: arboles_bosque
+
+rutas:
+  catalogo:      kb/arboles/arboles.csv
+  sitios:        kb/arboles/arboles_sitios.csv
+  interacciones: kb/arboles/arboles_interacciones.csv         # lista dispersa [-2,2]
+  escenarios:    kb/arboles/arboles_escenarios.csv
+id_col: id
+
+rasgos:
+  agresividad:       null
+  carga_individuo:   area_copa_m2           # derivada (pi*(diam/2)^2) -> solape de copas
+  capacidad_sitio:   area_sitio_m2          # derivada (superficie_ha*10000)
+  precio_unidad:     precio_plantula_usd
+  costo_sitio:       costo_establecimiento_usd_ha
+  min_agrupacion:    null
+
+estratos:
+  col: estrato_dosel
+  orden: [sotobosque, subdosel, dosel, emergente]
+  kernel: exp_neg
+
+ejes_ambientales:
+  - { col_min: temp_min_c,    col_max: temp_max_c,    ref: temp_ref,   tol: 1.0 }
+  - { col_min: precip_min_mm, col_max: precip_max_mm, ref: precip_ref, tol: 100.0 }
+  - { col_min: ph_min,        col_max: ph_max,        ref: ph_ref,     tol: 0.5 }
+  - { col_min: zona_usda_min, col_max: zona_usda_max, ref: zona_ref,   tol: 0.0 }
+
+metricas:
+  # 5 objetivos, escalas dispares -> agregacion por Pareto (NSGA-II), invariante a escala
+  - { nombre: co2_alometria_chave,  peso: 1.0, signo: 1,  clave_reporte: co2,      params: { col_diam: diam_copa_m, col_altura: altura_madura_m_max, densidad_madera: 0.6 } }
+  - { nombre: valor_indices,        peso: 1.0, signo: 1,  clave_reporte: biodiv,   params: { cols: [valor_biodiversidad], media: true } }
+  - { nombre: equilibrio_pares,     peso: 1.0, signo: 1,  clave_reporte: eq_pares, params: { promediar: true } }
+  - { nombre: biodiversidad_shannon, peso: 0.5, signo: 1, clave_reporte: I_b }
+  - { nombre: sobrecarga_capacidad, peso: 1.0, signo: -1, clave_reporte: carga,    params: { cap: 1.0 } }
+
+restricciones:
+  - { tipo: ambiental }
+  - { tipo: capacidad, clave: carga, op: ">=", umbral: 1.0 }
+  - { tipo: presupuesto }
+
+penalizaciones:
+  modo: mortal
+
+agregacion: pareto_nsga2
+
+params:
+  interacciones_formato: disperso
+  escala_origen: [-2, 2]
+  reglas: kb/arboles/arboles_reglas.md
+  columnas_derivadas:
+    catalogo:
+      area_copa_m2: { op: area_circulo, col: diam_copa_m }
+    sitios:
+      area_sitio_m2: { op: escala, col: superficie_ha, factor: 10000.0 }

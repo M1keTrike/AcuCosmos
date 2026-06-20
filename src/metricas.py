@@ -104,7 +104,8 @@ def ejes_factibles(individuo, ctx):
         ref = float(ctx.escenario[eje.ref])
         for i in activas:
             lo = float(cat.iloc[i][eje.col_min]) - eje.tol
-            hi = float(cat.iloc[i][eje.col_max]) + eje.tol
+            hi = (float(cat.iloc[i][eje.col_max]) + eje.tol
+                  if eje.col_max is not None else float("inf"))  # cota sup. abierta (OD)
             if ref < lo:
                 ok = False
                 viol += (lo - ref)
@@ -229,17 +230,84 @@ def m_bonus_diversidad(individuo, ctx, params):
     return n / max_esp
 
 
+def _es_si(v):
+    return str(v).strip().lower() in ("si", "sí", "s", "1", "true", "yes")
+
+
+@metrica("valor_indices")
+def m_valor_indices(individuo, ctx, params):
+    """Objetivo de valor por indices cualitativos (Cat. 6): suma de las columnas
+    `params['cols']` por especie, media sobre activas (por defecto). Bono opcional
+    si alguna activa tiene `params['bono_col']` en "si" (p.ej. fijacion de N).
+    Plantas: rendimiento+polinizador+estetico (base de LER [12]); arboles:
+    valor_biodiversidad [10][11]."""
+    cat = ctx.catalogo
+    activas = EspeciesActivas(individuo)
+    if not activas:
+        return 0.0
+    cols = params.get("cols", [])
+    total = sum(float(cat.iloc[i][c]) for i in activas for c in cols)
+    if params.get("media", True):
+        total /= len(activas)
+    bono_col = params.get("bono_col")
+    if bono_col and any(_es_si(cat.iloc[i][bono_col]) for i in activas):
+        total += float(params.get("bono", 0.0))
+    return total
+
+
+@metrica("valor_produccion")
+def m_valor_produccion(individuo, ctx, params):
+    """Produccion*valor de mercado (Cat. 6): Sum_i C_i * prod_i * factor * valor_i.
+    Acuicola: prod=peso_cosecha_g (factor 0.001 -> kg) * valor_mercado_usd_kg [15]."""
+    cat = ctx.catalogo
+    col_prod = params["col_prod"]
+    col_valor = params["col_valor"]
+    factor = float(params.get("factor", 1.0))
+    total = 0.0
+    for i in EspeciesActivas(individuo):
+        kg = float(cat.iloc[i][col_prod]) * int(individuo["C"][i]) * factor
+        total += kg * float(cat.iloc[i][col_valor])
+    return total
+
+
+@metrica("co2_alometria_chave")
+def m_co2_alometria_chave(individuo, ctx, params):
+    """Secuestro de CO2 por alometria pantropical de Chave [14], en lugar del
+    co2_kg_arbol_anio 100% estimado: AGB = 0.0673*(rho*D^2*H)^0.976 (kg).
+
+    Densidad de madera `rho` DERIVADA (default por dominio; aprobado por el
+    usuario) y DBH estimado del diametro de copa (factor_dbh) por falta de DBH en
+    la base — aproximacion documentada (ver INFORME_REFACTOR). CO2 = AGB*0.47*44/12.
+    """
+    cat = ctx.catalogo
+    col_diam = params.get("col_diam", "diam_copa_m")
+    col_h = params.get("col_altura", "altura_madura_m_max")
+    rho = float(params.get("densidad_madera", 0.6))
+    f_dbh = float(params.get("factor_dbh_cm_por_m_copa", 10.0))
+    total = 0.0
+    for i in EspeciesActivas(individuo):
+        H = float(cat.iloc[i][col_h])
+        D = float(cat.iloc[i][col_diam]) * f_dbh                # DBH (cm) estimado
+        agb = 0.0673 * (rho * D * D * H) ** 0.976              # kg biomasa aerea
+        total += agb * 0.47 * (44.0 / 12.0) * int(individuo["C"][i])
+    return total
+
+
 # --------------------------------------------------------------------------- #
 # Costo (restriccion de presupuesto; no entra en la suma de objetivos de peces)
 # --------------------------------------------------------------------------- #
 def costo_total(individuo, ctx):
     cat = ctx.catalogo
-    col_precio = ctx.col("precio_unidad")
     activas = EspeciesActivas(individuo)
-    costo_esp = sum(int(cat.iloc[i][col_precio]) * int(individuo["C"][i])
-                    for i in activas)
-    costo_sitio = int(ctx.sitio_actual(individuo)[ctx.col("costo_sitio")])
-    return costo_esp + costo_sitio
+    costo = 0.0
+    col_precio = ctx.col("precio_unidad")          # None si el dominio no tiene precio/unidad
+    if col_precio is not None:
+        costo += sum(float(cat.iloc[i][col_precio]) * int(individuo["C"][i])
+                     for i in activas)
+    col_sitio = ctx.col("costo_sitio")
+    if col_sitio is not None:
+        costo += float(ctx.sitio_actual(individuo)[col_sitio])
+    return costo
 
 
 # --------------------------------------------------------------------------- #

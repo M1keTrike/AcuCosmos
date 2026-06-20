@@ -1,0 +1,3 @@
+nombre,temp_ref,precip_ref,ph_ref,zona_ref,presupuesto,sitios_permitidos,min_especies,max_especies
+reforestacion_humeda,25,2000,6.0,11,6000,0;3,3,7
+agroforesteria,26,2500,6.0,11,8000,4,3,7

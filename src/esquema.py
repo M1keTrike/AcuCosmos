@@ -38,10 +38,10 @@ def _abs(ruta: str) -> str:
 
 @dataclass(frozen=True)
 class EjeAmbiental:
-    col_min: str          # columna del catalogo (limite inferior tolerado)
-    col_max: str          # columna del catalogo (limite superior tolerado)
-    ref: str              # CLAVE del escenario que da el valor de referencia
-    tol: float            # factible si ref in [min - tol, max + tol]
+    col_min: str               # columna del catalogo (limite inferior tolerado)
+    col_max: Optional[str]     # columna del catalogo; None = cota superior +inf (p.ej. OD)
+    ref: str                   # CLAVE del escenario que da el valor de referencia
+    tol: float                 # factible si ref in [min - tol, max + tol]
 
 
 @dataclass(frozen=True)
@@ -89,8 +89,8 @@ def _err(msg: str):
 
 def _construir(cfg: dict) -> EsquemaDominio:
     ejes = tuple(
-        EjeAmbiental(col_min=e["min"] if "min" in e else e["col_min"],
-                     col_max=e["max"] if "max" in e else e["col_max"],
+        EjeAmbiental(col_min=e.get("min", e.get("col_min")),
+                     col_max=e.get("max", e.get("col_max")),
                      ref=e["ref"], tol=float(e.get("tol", 0.0)))
         for e in cfg.get("ejes_ambientales", []))
     metricas = tuple(
@@ -164,15 +164,20 @@ def _validar_columnas(esquema: EsquemaDominio):
     ruta_cat = _abs(esquema.rutas.get("catalogo", ""))
     if not os.path.exists(ruta_cat):
         _err(f"no existe el catalogo: {ruta_cat}")
-    cols_cat = list(pd.read_csv(ruta_cat, encoding="utf-8-sig", nrows=0).columns)
+    cols_cat = set(pd.read_csv(ruta_cat, encoding="utf-8-sig", nrows=0).columns)
     if esquema.id_col not in cols_cat:
         _err(f"id_col '{esquema.id_col}' no esta en el catalogo")
 
-    cols_sit = []
+    cols_sit = set()
     ruta_sit = esquema.rutas.get("sitios")
     if ruta_sit and os.path.exists(_abs(ruta_sit)):
-        cols_sit = list(pd.read_csv(_abs(ruta_sit), encoding="utf-8-sig",
-                                    nrows=0).columns)
+        cols_sit = set(pd.read_csv(_abs(ruta_sit), encoding="utf-8-sig",
+                                   nrows=0).columns)
+
+    # columnas derivadas declaradas en params (se crean al cargar las tablas)
+    derivadas = esquema.params.get("columnas_derivadas", {}) or {}
+    cols_cat |= set((derivadas.get("catalogo") or {}).keys())
+    cols_sit |= set((derivadas.get("sitios") or {}).keys())
 
     for rol, col in esquema.rasgos.items():
         if col is None:
@@ -188,27 +193,79 @@ def _validar_columnas(esquema: EsquemaDominio):
             _err(f"estratos.col '{ce}' no existe en el catalogo")
     for eje in esquema.ejes_ambientales:
         for c in (eje.col_min, eje.col_max):
-            if c not in cols_cat:
+            if c is not None and c not in cols_cat:
                 _err(f"eje ambiental -> columna '{c}' no existe en el catalogo")
+
+
+def _aplicar_derivadas(df, specs):
+    """Crea columnas derivadas declaradas (op: reciproco|area_circulo|escala|producto)."""
+    for nombre, spec in (specs or {}).items():
+        op = spec["op"]
+        if op == "reciproco":                       # 1/col (p.ej. area por planta)
+            col = df[spec["col"]].astype(float).to_numpy()
+            df[nombre] = np.where(col > 0, 1.0 / col, np.inf)
+        elif op == "area_circulo":                  # pi*(d/2)^2 (solape de copas)
+            d = df[spec["col"]].astype(float).to_numpy()
+            df[nombre] = np.pi * (d / 2.0) ** 2
+        elif op == "escala":                        # col * factor
+            df[nombre] = df[spec["col"]].astype(float) * float(spec["factor"])
+        elif op == "producto":                      # col1*col2*... * factor
+            r = np.ones(len(df))
+            for c in spec["cols"]:
+                r = r * df[c].astype(float).to_numpy()
+            df[nombre] = r * float(spec.get("factor", 1.0))
+        else:
+            _err(f"op de columna derivada desconocida: {op}")
+    return df
 
 
 def cargar_tablas(esquema: EsquemaDominio):
     """Carga (catalogo, sitios, matriz_kappa) segun las rutas del esquema.
 
-    En Fase 1 solo el formato 'densa' (peces). El disperso->denso con heuristicas
-    H1..Hn (Fase 2.2) se conecta en Fase 4.
+    Aplica columnas derivadas (params.columnas_derivadas) y construye la matriz:
+    'densa' (lee n×n ya en [-1,1]) o 'disperso' (lista de pares + heuristicas
+    H1..Hn, reescalado [-2,2]->[-1,1]; ver src/heuristicas.py).
     """
     catalogo = pd.read_csv(_abs(esquema.rutas["catalogo"]), encoding="utf-8-sig")
     sitios = pd.read_csv(_abs(esquema.rutas["sitios"]), encoding="utf-8-sig")
+    derivadas = esquema.params.get("columnas_derivadas", {}) or {}
+    _aplicar_derivadas(catalogo, derivadas.get("catalogo"))
+    _aplicar_derivadas(sitios, derivadas.get("sitios"))
+
     formato = esquema.params.get("interacciones_formato", "densa")
-    ruta_int = _abs(esquema.rutas["interacciones"])
     if formato == "densa":
-        kappa = pd.read_csv(ruta_int, encoding="utf-8-sig",
-                            index_col=0).to_numpy(dtype=float)
+        kappa = pd.read_csv(_abs(esquema.rutas["interacciones"]),
+                            encoding="utf-8-sig", index_col=0).to_numpy(dtype=float)
+    elif formato == "disperso":
+        from src.heuristicas import cargar_interacciones_disperso
+        kappa = cargar_interacciones_disperso(esquema, catalogo)
     else:
-        raise NotImplementedError(
-            "cargador disperso->denso (Fase 4); usa interacciones_formato: densa")
+        _err(f"interacciones_formato desconocido: {formato}")
     n = len(catalogo)
     if kappa.shape != (n, n):
         _err(f"matriz {kappa.shape} no alineada con catalogo ({n} especies)")
     return catalogo, sitios, kappa
+
+
+def cargar_escenarios(esquema: EsquemaDominio):
+    """Lee el CSV de escenarios -> lista de dicts (refs ambientales + presupuesto
+    + sitios_permitidos + min/max_especies). 'sitios_permitidos' admite "0;1" o
+    vacio (=todos)."""
+    df = pd.read_csv(_abs(esquema.rutas["escenarios"]), encoding="utf-8-sig")
+    escenarios = []
+    for _, fila in df.iterrows():
+        d = {}
+        for k in df.columns:
+            v = fila[k]
+            d[k] = None if (isinstance(v, float) and pd.isna(v)) else v
+        sp = d.get("sitios_permitidos")
+        if sp is None or str(sp).strip() == "":
+            d["sitios_permitidos"] = None
+        else:
+            d["sitios_permitidos"] = [int(x) for x in str(sp).split(";")
+                                      if str(x).strip() != ""]
+        for k in ("min_especies", "max_especies"):
+            if d.get(k) is not None:
+                d[k] = int(d[k])
+        escenarios.append(d)
+    return escenarios

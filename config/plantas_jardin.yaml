@@ -1,0 +1,52 @@
+# Dominio plantas_jardin — huerto/jardin tropical (companion planting).
+dominio: plantas_jardin
+
+rutas:
+  catalogo:      kb/plantas/plantas.csv
+  sitios:        kb/plantas/plantas_sitios.csv
+  interacciones: kb/plantas/plantas_pares_documentados.csv   # lista dispersa [-2,2]
+  escenarios:    kb/plantas/plantas_escenarios.csv
+id_col: id
+
+rasgos:
+  agresividad:       null
+  carga_individuo:   area_por_planta_m2     # derivada (1/densidad) -> ocupacion
+  capacidad_sitio:   area_m2                 # (sitios) area disponible
+  precio_unidad:     precio_semilla_usd
+  costo_sitio:       costo_usd
+  min_agrupacion:    null
+
+estratos:
+  col: estrato
+  orden: [rastrero, bajo, medio, alto, trepador]
+  kernel: exp_neg
+
+ejes_ambientales:
+  - { col_min: temp_min_c,    col_max: temp_max_c,    ref: temp_ref, tol: 1.0 }
+  - { col_min: ph_min,        col_max: ph_max,        ref: ph_ref,   tol: 0.5 }
+  - { col_min: zona_usda_min, col_max: zona_usda_max, ref: zona_ref, tol: 0.0 }
+
+metricas:
+  # valor (Cat.6): rendimiento + polinizadores + estetica, base de LER [12]; bono por fijacion de N
+  - { nombre: valor_indices,        peso: 1.0, signo: 1,  clave_reporte: valor,    params: { cols: [rendimiento_rel, valor_polinizador, valor_estetico], media: true, bono_col: fija_nitrogeno, bono: 0.5 } }
+  - { nombre: equilibrio_pares,     peso: 1.0, signo: 1,  clave_reporte: eq_pares, params: { promediar: true } }
+  - { nombre: biodiversidad_shannon, peso: 0.5, signo: 1, clave_reporte: I_b }
+  - { nombre: sobrecarga_capacidad, peso: 1.0, signo: -1, clave_reporte: carga,    params: { cap: 1.0 } }
+
+restricciones:
+  - { tipo: ambiental }
+  - { tipo: capacidad, clave: carga, op: ">=", umbral: 1.0 }
+  - { tipo: presupuesto }
+
+penalizaciones:
+  modo: mortal
+
+agregacion: suma_simple
+
+params:
+  interacciones_formato: disperso
+  escala_origen: [-2, 2]
+  reglas: kb/plantas/plantas_reglas.md
+  columnas_derivadas:
+    catalogo:
+      area_por_planta_m2: { op: reciproco, col: densidad_plantas_m2 }

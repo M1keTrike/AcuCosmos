@@ -1,0 +1,48 @@
+# Dominio fauna_terrestre — integracion cultivo-ganado de granja tropical.
+# Capacidad v1 por espacio de manejo (espacio_min_m2 vs superficie en m2); la
+# Unidad Animal (UA) por forraje/ha queda como refinamiento (ver INFORME_REFACTOR).
+dominio: fauna_terrestre
+
+rutas:
+  catalogo:      kb/fauna_terrestre/terrestre_especies.csv
+  sitios:        kb/fauna_terrestre/terrestre_sitios.csv
+  interacciones: kb/fauna_terrestre/terrestre_interacciones.csv   # lista dispersa [-2,2]
+  escenarios:    kb/fauna_terrestre/terrestre_escenarios.csv
+id_col: id
+
+rasgos:
+  agresividad:       null
+  carga_individuo:   espacio_min_m2         # espacio de instalacion/manejo por animal
+  capacidad_sitio:   superficie             # (sitios en m2; el escenario elige sitios m2)
+  precio_unidad:     null                   # valor_mercado es texto; costo = sitio
+  costo_sitio:       costo_usd
+  min_agrupacion:    null
+
+estratos:
+  col: estrato
+  orden: [suelo, pasto_bajo, arbustivo_ramoneo, aereo, confinado]
+  kernel: exp_neg
+
+ejes_ambientales:
+  - { col_min: temp_min_c, col_max: temp_max_c, ref: temp_ref, tol: 2.0 }
+
+metricas:
+  - { nombre: valor_indices,        peso: 1.0, signo: 1,  clave_reporte: valor,    params: { cols: [rendimiento_rel], media: true } }
+  - { nombre: equilibrio_pares,     peso: 1.0, signo: 1,  clave_reporte: eq_pares, params: { promediar: true } }
+  - { nombre: biodiversidad_shannon, peso: 0.5, signo: 1, clave_reporte: I_b }
+  - { nombre: sobrecarga_capacidad, peso: 1.0, signo: -1, clave_reporte: carga,    params: { cap: 1.0 } }
+
+restricciones:
+  - { tipo: ambiental }
+  - { tipo: capacidad, clave: carga, op: ">=", umbral: 1.0 }
+  - { tipo: presupuesto }
+
+penalizaciones:
+  modo: mortal
+
+agregacion: suma_simple
+
+params:
+  interacciones_formato: disperso
+  escala_origen: [-2, 2]
+  reglas: kb/fauna_terrestre/terrestre_reglas.md

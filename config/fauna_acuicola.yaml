@@ -1,0 +1,53 @@
+# Dominio fauna_acuicola — policultivo de agua dulce productivo.
+dominio: fauna_acuicola
+
+rutas:
+  catalogo:      kb/fauna_acuicola/acuicola_especies.csv
+  sitios:        kb/fauna_acuicola/acuicola_sitios.csv
+  interacciones: kb/fauna_acuicola/acuicola_interacciones.csv   # lista dispersa [-2,2]
+  escenarios:    kb/fauna_acuicola/acuicola_escenarios.csv
+id_col: id
+
+rasgos:
+  agresividad:       null
+  carga_individuo:   biomasa_kg             # derivada (peso_cosecha_g*0.001)
+  capacidad_sitio:   cap_biomasa_kg         # derivada (capacidad_carga_kg_m3*volumen_m3)
+  precio_unidad:     null                   # sin precio de alevin; costo = sitio (FCA pendiente)
+  costo_sitio:       costo_usd
+  min_agrupacion:    null
+
+estratos:
+  col: estrato_agua
+  orden: [superficie, columna, fondo, toda_la_columna]
+  kernel: exp_neg
+
+ejes_ambientales:
+  - { col_min: temp_min_c, col_max: temp_max_c, ref: temp_ref, tol: 1.0 }
+  - { col_min: ph_min,     col_max: ph_max,     ref: ph_ref,   tol: 0.3 }
+  - { col_min: od_min_mg_l, col_max: null,      ref: od_ref,   tol: 0.5 }  # OD: cota inferior (sitio >= od_min)
+
+metricas:
+  - { nombre: valor_produccion,     peso: 1.0, signo: 1,  clave_reporte: valor,    params: { col_prod: peso_cosecha_g, factor: 0.001, col_valor: valor_mercado_usd_kg } }
+  - { nombre: equilibrio_pares,     peso: 1.0, signo: 1,  clave_reporte: eq_pares, params: { promediar: true } }
+  - { nombre: biodiversidad_shannon, peso: 0.5, signo: 1, clave_reporte: I_b }
+  - { nombre: sobrecarga_capacidad, peso: 1.0, signo: -1, clave_reporte: carga,    params: { cap: 1.0 } }
+
+restricciones:
+  - { tipo: ambiental }
+  - { tipo: capacidad, clave: carga, op: ">=", umbral: 1.0 }   # biomasa <= capacidad de carga
+  - { tipo: presupuesto }
+
+penalizaciones:
+  modo: mortal
+
+agregacion: pareto_nsga2
+
+params:
+  interacciones_formato: disperso
+  escala_origen: [-2, 2]
+  reglas: kb/fauna_acuicola/acuicola_reglas.md
+  columnas_derivadas:
+    catalogo:
+      biomasa_kg: { op: escala, col: peso_cosecha_g, factor: 0.001 }
+    sitios:
+      cap_biomasa_kg: { op: producto, cols: [capacidad_carga_kg_m3, volumen_m3] }

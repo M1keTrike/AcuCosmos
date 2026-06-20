@@ -1,0 +1,3 @@
+nombre,temp_ref,presupuesto,sitios_permitidos,min_especies,max_especies
+granja_integrada,26,3000,2;3;7,2,5
+traspatio,28,2000,7,2,4

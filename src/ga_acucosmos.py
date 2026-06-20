@@ -28,6 +28,25 @@ def EjecutarAG(ctx: ContextoEvaluacion,
     tanques = ctx.sitios
     esquema = ctx.esquema
     ctx.generaciones_max = generaciones_max
+
+    def _hist_reg(gen, mejor, peor, prom, m):
+        # registro generico: metricas por su clave_reporte (peces conserva A_e..M_s)
+        reg = {'generacion': gen, 'apt_mejor': float(mejor),
+               'apt_peor': float(peor), 'apt_promedio': float(prom),
+               'costo': m.get('costo', 0), 'factible': m.get('factible', False)}
+        for mc in esquema.metricas:
+            reg[mc.clave_reporte] = m.get(mc.clave_reporte)
+        return reg
+
+    def _linea_verbose(gen, apt_mejor, apt_prom, m):
+        def _f(v):
+            return f"{v:.3f}" if isinstance(v, (int, float)) else str(v)
+        partes = " ".join(f"{mc.clave_reporte}={_f(m.get(mc.clave_reporte))}"
+                          for mc in esquema.metricas)
+        fac = "OK" if m.get('factible') else "INF"
+        return (f"  Gen {gen:3d} | mejor={apt_mejor:.4f} prom={apt_prom:.4f} | "
+                f"{partes} ${m.get('costo')} [{fac}]")
+
     poblacion = FuncionInicializacion(
         tam_poblacion, catalogo, tanques, esquema,
         min_especies=min_especies, max_especies=max_especies,
@@ -70,27 +89,11 @@ def EjecutarAG(ctx: ContextoEvaluacion,
     _actualizar_hall(poblacion, aptitudes, metricas_list)
 
     m_init = metricas_list[mejor_global_idx]
-    historial.append({
-        'generacion': 0,
-        'apt_mejor': float(max(aptitudes)),
-        'apt_peor': float(min(aptitudes)),
-        'apt_promedio': float(np.mean(aptitudes)),
-        'A_e': m_init['A_e'],
-        'I_b': m_init['I_b'],
-        'R_v': m_init['R_v'],
-        'N_c': m_init['N_c'],
-        'M_s': m_init['M_s'],
-        'costo': m_init['costo'],
-        'factible': m_init['factible'],
-    })
+    historial.append(_hist_reg(0, max(aptitudes), min(aptitudes),
+                               float(np.mean(aptitudes)), m_init))
     if verbose:
-        factible_str = "OK" if m_init['factible'] else "INF"
-        print(f"  Gen   0 | mejor={historial[0]['apt_mejor']:.4f} "
-              f"prom={historial[0]['apt_promedio']:.4f} | "
-              f"A_e={m_init['A_e']:.3f} I_b={m_init['I_b']:.3f} "
-              f"R_v={m_init['R_v']:.2f} N_c={m_init['N_c']:.3f} "
-              f"M_s={m_init['M_s']:.3f} "
-              f"${m_init['costo']} [{factible_str}]")
+        print(_linea_verbose(0, historial[0]['apt_mejor'],
+                             historial[0]['apt_promedio'], m_init))
 
     sin_factibles = 0
     REINICIO_TRAS = 15
@@ -131,19 +134,7 @@ def EjecutarAG(ctx: ContextoEvaluacion,
         mejor_idx_pre = int(np.argmax(combinadas_apt))
         m_mejor = combinadas_met[mejor_idx_pre]
 
-        historial.append({
-            'generacion': g + 1,
-            'apt_mejor': apt_mejor,
-            'apt_peor': apt_peor,
-            'apt_promedio': apt_prom,
-            'A_e': m_mejor['A_e'],
-            'I_b': m_mejor['I_b'],
-            'R_v': m_mejor['R_v'],
-            'N_c': m_mejor['N_c'],
-            'M_s': m_mejor['M_s'],
-            'costo': m_mejor['costo'],
-            'factible': m_mejor['factible'],
-        })
+        historial.append(_hist_reg(g + 1, apt_mejor, apt_peor, apt_prom, m_mejor))
 
         orden = sorted(range(len(combinados)),
                        key=lambda k: combinadas_scores[k], reverse=True)
@@ -196,13 +187,7 @@ def EjecutarAG(ctx: ContextoEvaluacion,
             estancamiento += 1
 
         if verbose and ((g + 1) % 10 == 0 or g == 0):
-            factible_str = "OK" if m_mejor['factible'] else "INF"
-            print(f"  Gen {g+1:3d} | mejor={apt_mejor:.4f} "
-                  f"prom={apt_prom:.4f} | "
-                  f"A_e={m_mejor['A_e']:.3f} I_b={m_mejor['I_b']:.3f} "
-                  f"R_v={m_mejor['R_v']:.2f} N_c={m_mejor['N_c']:.3f} "
-                  f"M_s={m_mejor['M_s']:.3f} "
-                  f"${m_mejor['costo']} [{factible_str}]")
+            print(_linea_verbose(g + 1, apt_mejor, apt_prom, m_mejor))
 
         if estancamiento >= estancamiento_max:
             break
