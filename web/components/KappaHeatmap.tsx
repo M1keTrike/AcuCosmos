@@ -57,7 +57,9 @@ export function KappaHeatmap({
   const W = labelW + k * cell + 8;
   const H = k * cell + 8;
 
-  const h = hover ? par(filas[hover.r].idx, filas[hover.c].idx) : null;
+  const fr = hover ? filas[hover.r] : undefined;
+  const fc = hover ? filas[hover.c] : undefined;
+  const h = fr && fc ? par(fr.idx, fc.idx) : null;
 
   return (
     <div className="tarjeta p-5">
@@ -116,11 +118,11 @@ export function KappaHeatmap({
       </div>
 
       <div className="mt-2 h-10 text-sm">
-        {hover && h ? (
+        {h && fr && fc ? (
           <p className="text-white/80">
-            <span className="font-medium">{filas[hover.r].nombre}</span>
+            <span className="font-medium">{fr.nombre}</span>
             <span className="mx-1.5 text-white/40">×</span>
-            <span className="font-medium">{filas[hover.c].nombre}</span>
+            <span className="font-medium">{fc.nombre}</span>
             {" → "}
             <span
               className="font-mono"

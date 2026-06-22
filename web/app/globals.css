@@ -7,6 +7,10 @@
   --panel-2: #111a2e;
   --borde: #1e2a44;
   --muted: #8aa0c0;
+
+  /* Curvas de easing fuertes (las nativas se sienten flojas) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 @theme inline {
@@ -91,4 +95,64 @@ body {
   cursor: not-allowed;
   filter: none;
   transform: none;
+}
+
+/* --- Juego guiado --------------------------------------------------------- */
+/* Botón grande con feedback de presión (scale 0.97) — modo expo/táctil */
+.boton-juego {
+  transition: transform 160ms var(--ease-out), filter 200ms ease,
+    box-shadow 200ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .boton-juego:hover {
+    filter: brightness(1.06);
+    transform: translateY(-2px);
+  }
+}
+.boton-juego:active {
+  transform: scale(0.97);
+}
+.boton-juego:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+/* Pop del puntaje al subir */
+@keyframes pop-puntaje {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.pop-puntaje {
+  animation: pop-puntaje 320ms var(--ease-out);
+}
+
+/* Bob suave de la mascota */
+@keyframes mascota-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.mascota-bob {
+  animation: mascota-bob 3.2s ease-in-out infinite;
+}
+
+/* Caída de confeti */
+@keyframes confeti-caida {
+  0% { transform: translateY(-12vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0.9; }
+}
+
+/* Respeto a quienes prefieren menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .mascota-bob,
+  .pop-puntaje {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
 }

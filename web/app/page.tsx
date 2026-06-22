@@ -1,46 +1,29 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { apiDominios } from "@/lib/api";
-import type { DominioMeta } from "@/lib/types";
-import { DomainPanel } from "@/components/DomainPanel";
-import { HeroSelector } from "@/components/HeroSelector";
+import { useState } from "react";
+import { JuegoGuiado } from "@/components/juego/JuegoGuiado";
+import { ExpertoApp } from "@/components/experto/ExpertoApp";
+
+type Modo = "juego" | "experto";
 
 export default function Home() {
-  const [dominios, setDominios] = useState<DominioMeta[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [sel, setSel] = useState<DominioMeta | null>(null);
+  const [modo, setModo] = useState<Modo>("juego");
 
-  useEffect(() => {
-    apiDominios()
-      .then((d) => setDominios(d.filter((x) => !x.error)))
-      .catch((e) => setError(String(e)))
-      .finally(() => setCargando(false));
-  }, []);
-
-  return (
-    <AnimatePresence mode="wait">
-      {sel ? (
-        <DomainPanel key={sel.id} dominio={sel} onBack={() => setSel(null)} />
-      ) : (
-        <motion.div
-          key="hero"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-1 flex-col"
+  if (modo === "experto") {
+    return (
+      <div className="relative flex flex-1 flex-col">
+        <button
+          type="button"
+          onClick={() => setModo("juego")}
+          className="boton-acento fixed right-4 top-4 z-40 rounded-full border border-borde bg-panel px-3 py-1.5 text-xs text-white/70"
+          title="Volver al modo guiado"
         >
-          <HeroSelector
-            dominios={dominios}
-            cargando={cargando}
-            error={error}
-            onSelect={setSel}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+          ← Modo juego
+        </button>
+        <ExpertoApp />
+      </div>
+    );
+  }
+
+  return <JuegoGuiado onExperto={() => setModo("experto")} />;
 }
