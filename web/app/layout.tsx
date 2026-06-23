@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AcuCosmos — Ensamblajes multi-dominio",
+  title: "BioNexo — Ensamblajes biológicos multi-dominio",
   description:
     "Algoritmo genético que diseña ensamblajes biológicos en vivo: acuario, huerto, bosque, policultivo acuícola y granja integrada.",
 };

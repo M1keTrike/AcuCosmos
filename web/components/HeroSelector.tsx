@@ -27,7 +27,7 @@ export function HeroSelector({
           Algoritmo genético · ensamblajes biológicos
         </p>
         <h1 className="titulo-grad text-balance text-5xl font-bold tracking-tight sm:text-6xl">
-          AcuCosmos
+          BioNexo
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg text-white/65">
           Un mismo motor evolutivo, cinco mundos. Elige un dominio y mira cómo el

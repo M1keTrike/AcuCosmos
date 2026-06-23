@@ -81,6 +81,15 @@ AcuCosmos/
 │   ├── operadores.py       # Inicialización, selección, cruza, mutación, reparación
 │   ├── ga_acucosmos.py     # Bucle principal del algoritmo genético
 │   └── visualizacion.py    # Gráficas y tablas de resultados
+├── config/                 # Configs YAML por dominio (framework multi-dominio)
+├── kb/                     # Bases de conocimiento por dominio (CSV)
+├── api/                    # Backend FastAPI (REST + SSE) que envuelve el motor
+│   ├── app.py              # Endpoints + stream /api/run (Server-Sent Events)
+│   ├── servicio.py         # Metadatos de dominios, catálogos y matriz κ
+│   └── streaming.py        # Corre el AG y emite cada generación
+├── web/                    # Frontend Next.js (GUI web en vivo)
+├── requirements.txt        # Dependencias del motor/CLI
+├── requirements-web.txt    # Dependencias extra del backend web
 └── resultados/             # Salidas generadas (PNG + CSV)
 ```
 
@@ -199,6 +208,53 @@ Por cada escenario se generan en `resultados/`:
 
 ---
 
+## Opción C — GUI web en vivo (Next.js + FastAPI)
+
+Interfaz web animada que corre el AG **en tiempo real**: un backend FastAPI envuelve
+el motor genético (sin modificarlo) y transmite cada generación por **SSE**; el
+frontend Next.js dibuja la convergencia, la matriz de compatibilidad κ, el radar de
+métricas y la escena del ensamblaje mientras corre.
+
+Son **dos procesos** que se levantan por separado.
+
+### Requisitos
+- El entorno Python del repo (`.venv`) ya creado y activado (ver *Puesta en marcha*).
+- **Node.js 18+** (probado con 24) y **npm**.
+
+### 1. Backend (FastAPI) — desde la raíz del repo
+
+```bash
+pip install -r requirements-web.txt      # una sola vez (se suma a requirements.txt)
+uvicorn api.app:app --reload             # queda en http://localhost:8000
+```
+
+Verifica que responde: abre `http://localhost:8000/api/salud` (debe listar los dominios).
+
+### 2. Frontend (Next.js) — desde `web/`
+
+En **otra terminal**:
+
+```bash
+cd web
+npm install                              # una sola vez
+npm run dev                              # queda en http://localhost:3000
+```
+
+Abre **http://localhost:3000** → elige un dominio → **Ejecutar AG**.
+
+> El frontend apunta por defecto a `http://localhost:8000`. Si el backend corre en
+> otra URL/puerto, define `NEXT_PUBLIC_API_BASE` (p. ej. en `web/.env.local`):
+> ```
+> NEXT_PUBLIC_API_BASE=http://localhost:8000
+> ```
+
+**Endpoints de la API:** `/api/salud`, `/api/dominios`,
+`/api/dominios/{dom}/escenarios`, `/api/dominios/{dom}/catalogo`,
+`/api/dominios/{dom}/kappa` y el stream `/api/run`. Más detalle en
+[web/README.md](web/README.md).
+
+---
+
 ## Framework multi-dominio (extensión)
 
 Sobre la rama `feature/framework-multidominio`, AcuCosmos se generaliza a un
@@ -257,12 +313,26 @@ Decisiones de diseño, validación del YAML y simplificaciones conocidas: ver
 
 ##  Stack técnico
 
-- **Python** — lenguaje principal
+**Motor y CLI (Python)**
+- **Python 3.10+** — lenguaje principal (probado con 3.12)
 - **NumPy** — operaciones vectoriales y aleatoriedad
 - **Pandas** — manejo de catálogos y resultados
 - **Matplotlib** — visualizaciones
-- **Tkinter** — interfaz gráfica
+- **PyYAML** — configuración por dominio del framework multi-dominio
+- **Tkinter** — interfaz gráfica de escritorio
 - **Pillow** *(opcional)* — escalado de imágenes en la GUI
+
+**Backend web** (`api/`, en `requirements-web.txt`)
+- **FastAPI** — API REST de metadatos + endpoint de streaming
+- **Uvicorn** — servidor ASGI
+- **sse-starlette** — Server-Sent Events (AG en vivo, generación a generación)
+
+**Frontend web** (`web/`)
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS v4** — estilos
+- **Framer Motion** — animaciones
+- **Recharts** — gráficas (convergencia, radar de métricas)
+- **Three.js / @react-three** — escena del ensamblaje
 
 ---
 
