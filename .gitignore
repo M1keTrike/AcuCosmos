@@ -16,3 +16,4 @@ resultados/
 .DS_Store
 .claude/
 *.md
+.opencode/
