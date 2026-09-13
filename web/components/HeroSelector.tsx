@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { DominioMeta } from "@/lib/types";
 import { DomainCard } from "./DomainCard";
+import { LogoBioNexo } from "./LogoBioNexo";
 
 export function HeroSelector({
   dominios,
@@ -23,13 +24,16 @@ export function HeroSelector({
         transition={{ duration: 0.5 }}
         className="text-center"
       >
-        <p className="mb-3 text-sm font-medium uppercase tracking-[0.3em] text-cyan-300/70">
+        <div className="mb-4 flex justify-center">
+          <LogoBioNexo size={78} />
+        </div>
+        <p className="mb-3 text-sm font-medium uppercase tracking-[0.3em] text-teal">
           Algoritmo genético · ensamblajes biológicos
         </p>
         <h1 className="titulo-grad text-balance text-5xl font-bold tracking-tight sm:text-6xl">
           BioNexo
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg text-white/65">
+        <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg text-foreground/65">
           Un mismo motor evolutivo, cinco mundos. Elige un dominio y mira cómo el
           algoritmo arma el mejor ensamblaje, generación a generación.
         </p>
@@ -37,7 +41,7 @@ export function HeroSelector({
 
       <div className="mt-12 flex-1">
         {error && (
-          <div className="mx-auto max-w-xl rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-center text-sm text-red-200">
+          <div className="mx-auto max-w-xl rounded-xl border border-red-300 bg-red-50 p-4 text-center text-sm text-red-700">
             No se pudo conectar con el backend ({error}).<br />
             Levántalo con <code className="font-mono">uvicorn api.app:app --reload</code> en la
             raíz del repo.
@@ -63,10 +67,6 @@ export function HeroSelector({
           </div>
         )}
       </div>
-
-      <p className="mt-10 text-center text-xs text-white/35">
-        Reutiliza el motor genético (Python) sin modificarlo · datos en vivo por SSE
-      </p>
     </div>
   );
 }

@@ -11,13 +11,13 @@ import {
 import type { TopKItem } from "@/lib/types";
 import { etiquetaMetrica } from "@/lib/format";
 
-const COLORES = ["#38bdf8", "#a78bfa", "#94a3b8"];
+const COLORES = ["#e0922b", "#5aa63b", "#94a3b8"];
 const OMITIR = new Set(["n_especies", "costo", "factible"]);
 
 export function MetricsRadar({ topK, acento }: { topK: TopKItem[]; acento: string }) {
   if (topK.length === 0) {
     return (
-      <div className="tarjeta flex h-full min-h-[220px] items-center justify-center p-5 text-sm text-white/45">
+      <div className="tarjeta flex h-full min-h-[220px] items-center justify-center p-5 text-sm text-foreground/45">
         El radar de métricas aparece al terminar la corrida.
       </div>
     );
@@ -49,13 +49,13 @@ export function MetricsRadar({ topK, acento }: { topK: TopKItem[]; acento: strin
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
           Perfil de métricas
         </h3>
-        <span className="text-xs text-white/45">magnitud normalizada</span>
+        <span className="text-xs text-foreground/45">magnitud normalizada</span>
       </div>
       <div className="h-60 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data} outerRadius="72%">
-            <PolarGrid stroke="#1e2a44" />
-            <PolarAngleAxis dataKey="metrica" tick={{ fill: "#9fb2cf", fontSize: 11 }} />
+            <PolarGrid stroke="#c9d6d1" />
+            <PolarAngleAxis dataKey="metrica" tick={{ fill: "#4a5c58", fontSize: 11 }} />
             <PolarRadiusAxis domain={[0, 1]} tick={false} axisLine={false} />
             {topK.map((_, i) => (
               <Radar
@@ -72,7 +72,7 @@ export function MetricsRadar({ topK, acento }: { topK: TopKItem[]; acento: strin
           </RadarChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-1 flex justify-center gap-4 text-xs text-white/55">
+      <div className="mt-1 flex justify-center gap-4 text-xs text-foreground/55">
         {topK.map((_, i) => (
           <span key={i} className="inline-flex items-center gap-1.5">
             <span

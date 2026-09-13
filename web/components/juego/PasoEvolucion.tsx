@@ -37,7 +37,7 @@ export function PasoEvolucion({
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col">
-      <h2 className="text-center text-2xl font-bold text-white sm:text-3xl">
+      <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">
         {listo ? "¡Listo! La IA encontró el mejor diseño" : "La IA está diseñando…"}
       </h2>
 
@@ -56,7 +56,7 @@ export function PasoEvolucion({
       <div className="mt-5 rounded-2xl border border-borde bg-panel-2 p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="text-[11px] uppercase tracking-wide text-white/45">
+            <div className="text-[11px] uppercase tracking-wide text-foreground/45">
               Puntaje del diseño
             </div>
             <div
@@ -68,12 +68,12 @@ export function PasoEvolucion({
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[11px] uppercase tracking-wide text-white/45">
+            <div className="text-[11px] uppercase tracking-wide text-foreground/45">
               Ronda
             </div>
-            <div className="font-mono text-2xl text-white">
+            <div className="font-mono text-2xl text-foreground">
               {ronda}
-              <span className="text-white/40"> / {total}</span>
+              <span className="text-foreground/40"> / {total}</span>
             </div>
           </div>
         </div>
@@ -87,7 +87,7 @@ export function PasoEvolucion({
         </div>
 
         {run.estado === "error" && (
-          <p className="mt-4 text-sm text-red-300">
+          <p className="mt-4 text-sm text-red-600">
             Algo salió mal con el motor. Vuelve a “Otro mundo” e inténtalo de nuevo.
           </p>
         )}
@@ -99,7 +99,7 @@ export function PasoEvolucion({
           type="button"
           onClick={onVerEquipo}
           disabled={!listo}
-          className="boton-juego rounded-2xl px-8 py-4 text-lg font-semibold text-[#04121f] shadow-lg disabled:bg-panel disabled:text-white/40"
+          className="boton-juego rounded-2xl px-8 py-4 text-lg font-semibold text-white shadow-lg disabled:bg-panel disabled:text-foreground/40"
           style={listo ? { background: acento } : undefined}
         >
           {corriendo ? "Evolucionando…" : "Conoce a tu equipo →"}

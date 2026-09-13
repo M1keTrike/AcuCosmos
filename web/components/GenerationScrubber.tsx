@@ -45,7 +45,7 @@ export function GenerationScrubber({
         type="button"
         disabled={disabled || total <= 1}
         onClick={() => setPlaying((p) => !p)}
-        className="boton-acento flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-black"
+        className="boton-acento flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
         style={{ background: acento }}
         aria-label={playing ? "Pausar" : "Reproducir evolución"}
       >
@@ -53,10 +53,10 @@ export function GenerationScrubber({
       </button>
 
       <div className="flex-1">
-        <div className="mb-1 flex justify-between text-xs text-white/55">
+        <div className="mb-1 flex justify-between text-xs text-foreground/55">
           <span>
             Generación{" "}
-            <span className="font-mono text-white/90">{actual?.generacion ?? 0}</span>
+            <span className="font-mono text-foreground/90">{actual?.generacion ?? 0}</span>
             {" / "}
             {gens[max]?.generacion ?? 0}
           </span>
@@ -69,8 +69,8 @@ export function GenerationScrubber({
               <span
                 className="ml-2 rounded px-1.5 py-0.5 text-[10px]"
                 style={{
-                  background: actual.factible ? "#15803d33" : "#b91c1c33",
-                  color: actual.factible ? "#86efac" : "#fca5a5",
+                  background: actual.factible ? "#dcefe2" : "#fbe3e3",
+                  color: actual.factible ? "#0b5f57" : "#b91c1c",
                 }}
               >
                 {actual.factible ? "factible" : "inviable"}

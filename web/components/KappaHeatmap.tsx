@@ -7,7 +7,7 @@ import type { Kappa } from "@/lib/types";
 function colorKappa(v: number): string {
   if (v > 0) return `rgba(34,197,94,${0.18 + 0.82 * Math.min(1, v)})`;
   if (v < 0) return `rgba(239,68,68,${0.18 + 0.82 * Math.min(1, -v)})`;
-  return "#16223a";
+  return "#f1f6f4";
 }
 
 export function KappaHeatmap({
@@ -45,7 +45,7 @@ export function KappaHeatmap({
 
   if (filas.length === 0) {
     return (
-      <div className="tarjeta flex h-full min-h-[220px] items-center justify-center p-5 text-sm text-white/45">
+      <div className="tarjeta flex h-full min-h-[220px] items-center justify-center p-5 text-sm text-foreground/45">
         Corre el AG para ver la matriz de compatibilidad de las especies elegidas.
       </div>
     );
@@ -67,9 +67,9 @@ export function KappaHeatmap({
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
           Compatibilidad κ
         </h3>
-        <span className="text-xs text-white/45">{k} especies activas</span>
+        <span className="text-xs text-foreground/45">{k} especies activas</span>
       </div>
-      <div className="mb-3 flex items-center gap-3 text-xs text-white/55">
+      <div className="mb-3 flex items-center gap-3 text-xs text-foreground/55">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm" style={{ background: "rgba(34,197,94,0.9)" }} />
           sinergia
@@ -89,7 +89,7 @@ export function KappaHeatmap({
                 y={r * cell + cell / 2 + 4}
                 textAnchor="end"
                 fontSize={11}
-                fill="#9fb2cf"
+                fill="#4a5c58"
               >
                 {fa.nombre.length > 16 ? fa.nombre.slice(0, 15) + "…" : fa.nombre}
               </text>
@@ -104,8 +104,8 @@ export function KappaHeatmap({
                     width={cell - 2}
                     height={cell - 2}
                     rx={3}
-                    fill={esDiag ? "#0a1120" : colorKappa(p.v)}
-                    stroke={hover && hover.r === r && hover.c === c ? "#e8eef7" : "transparent"}
+                    fill={esDiag ? "#c9d6d1" : colorKappa(p.v)}
+                    stroke={hover && hover.r === r && hover.c === c ? "#0e2e2b" : "transparent"}
                     strokeWidth={1.5}
                     onMouseEnter={() => !esDiag && setHover({ r, c })}
                     onMouseLeave={() => setHover(null)}
@@ -119,25 +119,25 @@ export function KappaHeatmap({
 
       <div className="mt-2 h-10 text-sm">
         {h && fr && fc ? (
-          <p className="text-white/80">
+          <p className="text-foreground/80">
             <span className="font-medium">{fr.nombre}</span>
-            <span className="mx-1.5 text-white/40">×</span>
+            <span className="mx-1.5 text-foreground/40">×</span>
             <span className="font-medium">{fc.nombre}</span>
             {" → "}
             <span
               className="font-mono"
-              style={{ color: h.v > 0 ? "#86efac" : h.v < 0 ? "#fca5a5" : "#94a3b8" }}
+              style={{ color: h.v > 0 ? "#0b5f57" : h.v < 0 ? "#b91c1c" : "#94a3b8" }}
             >
               {h.v.toFixed(2)}
             </span>
             {h.proc && (
-              <span className="ml-2 rounded bg-white/10 px-1.5 py-0.5 text-[11px] text-white/60">
+              <span className="ml-2 rounded bg-foreground/10 px-1.5 py-0.5 text-[11px] text-foreground/60">
                 {h.proc}
               </span>
             )}
           </p>
         ) : (
-          <p className="text-white/40">Pasa el cursor sobre una celda para ver el par.</p>
+          <p className="text-foreground/40">Pasa el cursor sobre una celda para ver el par.</p>
         )}
       </div>
     </div>

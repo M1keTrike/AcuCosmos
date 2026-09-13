@@ -40,7 +40,7 @@ export function PasoReveal({
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.34, ease: EASE }}
-        className="text-center text-2xl font-bold text-white sm:text-3xl"
+        className="text-center text-2xl font-bold text-foreground sm:text-3xl"
       >
         ¿Cómo funcionó?
       </motion.h2>
@@ -48,9 +48,9 @@ export function PasoReveal({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.07, duration: 0.34, ease: EASE }}
-        className="mx-auto mt-2 max-w-lg text-center text-white/60"
+        className="mx-auto mt-2 max-w-lg text-center text-foreground/60"
       >
-        Acabas de usar un <span className="font-semibold text-white">algoritmo genético</span>.
+        Acabas de usar un <span className="font-semibold text-foreground">algoritmo genético</span>.
         Hizo esto por ti, en segundos:
       </motion.p>
 
@@ -72,8 +72,8 @@ export function PasoReveal({
             >
               {p.emoji}
             </motion.div>
-            <h3 className="mt-3 font-semibold text-white">{p.titulo}</h3>
-            <p className="mt-1 text-sm leading-snug text-white/65">{p.texto}</p>
+            <h3 className="mt-3 font-semibold text-foreground">{p.titulo}</h3>
+            <p className="mt-1 text-sm leading-snug text-foreground/65">{p.texto}</p>
           </motion.div>
         ))}
       </div>
@@ -92,7 +92,7 @@ export function PasoReveal({
         >
           ¿Para qué sirve en la vida real?
         </h3>
-        <p className="mt-2 text-lg leading-relaxed text-white/85">{narr.paraQueSirve}</p>
+        <p className="mt-2 text-lg leading-relaxed text-foreground/85">{narr.paraQueSirve}</p>
       </motion.div>
 
       <motion.div
@@ -104,7 +104,7 @@ export function PasoReveal({
         <button
           type="button"
           onClick={onReiniciar}
-          className="boton-juego rounded-2xl px-7 py-3.5 text-base font-semibold text-[#04121f] shadow-lg"
+          className="boton-juego rounded-2xl px-7 py-3.5 text-base font-semibold text-white shadow-lg"
           style={{ background: acento }}
         >
           🔄 Probar otro mundo
@@ -112,7 +112,7 @@ export function PasoReveal({
         <button
           type="button"
           onClick={onExperto}
-          className="boton-acento rounded-2xl border border-borde bg-panel px-6 py-3.5 text-base text-white/75"
+          className="boton-acento rounded-2xl border border-borde bg-panel px-6 py-3.5 text-base text-foreground/75"
         >
           Ver el modo experto →
         </button>

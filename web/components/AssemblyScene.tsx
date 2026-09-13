@@ -193,9 +193,9 @@ export function AssemblyScene({
         {[...estratos].reverse().map((e) => (
           <div
             key={e.idx}
-            className="flex flex-1 items-start border-t border-white/5 px-3 pt-1"
+            className="flex flex-1 items-start border-t border-foreground/5 px-3 pt-1"
           >
-            <span className="rounded bg-black/25 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-white/55">
+            <span className="rounded bg-foreground/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-foreground/55">
               {e.etiqueta}
             </span>
           </div>
@@ -203,7 +203,7 @@ export function AssemblyScene({
       </div>
       {vacio && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <span className="rounded-full bg-black/40 px-4 py-2 text-sm text-white/70">
+          <span className="rounded-full bg-foreground/10 px-4 py-2 text-sm text-foreground/70">
             Ejecuta el AG para ver el ensamblaje armarse aquí
           </span>
         </div>
@@ -236,13 +236,13 @@ function dibujar(
 
   // Suelo para escenas terrestres.
   if (!acuatico) {
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.fillStyle = "rgba(14,46,43,0.10)";
     ctx.fillRect(0, h * (1 - 1 / Math.max(1, estratos.length)), w, h);
   }
 
   // Separadores de banda.
   const n = Math.max(1, estratos.length);
-  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.strokeStyle = "rgba(14,46,43,0.08)";
   ctx.lineWidth = 1;
   for (let b = 1; b < n; b++) {
     const y = h * (1 - b / n);
@@ -266,7 +266,7 @@ function dibujar(
       if (p.x > w + 4) p.x = -4;
     }
     ctx.beginPath();
-    ctx.fillStyle = acuatico ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)";
+    ctx.fillStyle = acuatico ? "rgba(14,46,43,0.10)" : "rgba(14,46,43,0.08)";
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
     ctx.fill();
   }
@@ -311,7 +311,7 @@ function dibujarPez(ctx: CanvasRenderingContext2D, c: Creatura, bob: number) {
   ctx.ellipse(0, 0, c.r, c.r * 0.6, 0, 0, Math.PI * 2);
   ctx.fill();
   // ojo
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.fillStyle = "rgba(14,46,43,0.85)";
   ctx.beginPath();
   ctx.arc(c.r * 0.45, -c.r * 0.12, c.r * 0.14, 0, Math.PI * 2);
   ctx.fill();

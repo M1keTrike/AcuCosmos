@@ -18,7 +18,7 @@ import { PasoEvolucion } from "./PasoEvolucion";
 import { PasoEquipo } from "./PasoEquipo";
 import { PasoReveal } from "./PasoReveal";
 
-const ACENTO_BASE = "#38bdf8";
+const ACENTO_BASE = "#0f8b7e";
 
 export function JuegoGuiado({ onExperto }: { onExperto: () => void }) {
   const [paso, setPaso] = useState<PasoId>("bienvenida");
@@ -100,7 +100,6 @@ export function JuegoGuiado({ onExperto }: { onExperto: () => void }) {
 
   // --- mascota ------------------------------------------------------------ //
   const mascNombre = narr?.mascota ?? "Eco";
-  const mascEmoji = narr?.emoji ?? "🌍";
   const mascTexto = (() => {
     if (paso === "bienvenida")
       return "¡Hola! Soy tu guía. Vamos a diseñar juntos el ecosistema perfecto: tú eliges qué quieres y la computadora prueba miles de combinaciones por ti.";
@@ -116,7 +115,7 @@ export function JuegoGuiado({ onExperto }: { onExperto: () => void }) {
     <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col px-4 py-5 sm:px-6">
       <Confeti
         activo={paso === "equipo"}
-        colores={[acento, sel?.tema.acento2 ?? "#a78bfa", "#fde047", "#ffffff"]}
+        colores={[acento, sel?.tema.acento2 ?? "#e0922b", "#5aa63b", "#2f6fb3"]}
       />
 
       {/* Cabecera: progreso + botón modo experto */}
@@ -127,7 +126,7 @@ export function JuegoGuiado({ onExperto }: { onExperto: () => void }) {
         <button
           type="button"
           onClick={onExperto}
-          className="boton-acento shrink-0 rounded-full border border-borde bg-panel px-3 py-1.5 text-xs text-white/60"
+          className="boton-acento shrink-0 rounded-full border border-borde bg-panel px-3 py-1.5 text-xs text-foreground/60"
           title="Ver la versión técnica con gráficas y datos"
         >
           Modo experto →
@@ -138,7 +137,7 @@ export function JuegoGuiado({ onExperto }: { onExperto: () => void }) {
       <div className="mb-5">
         <GuiaMascota
           nombre={mascNombre}
-          emoji={mascEmoji}
+          forma={sel?.tema.forma}
           texto={mascTexto}
           acento={acento}
           textoKey={paso}

@@ -2,38 +2,48 @@
 
 import { useMemo } from "react";
 import type { EspecieMapa } from "./tipos-escena";
-import type { DoneEvento, GenEvento } from "@/lib/types";
+import type { ItemEnsamblaje } from "@/lib/types";
 import { etiquetaMetrica, fmt, fmtDinero } from "@/lib/format";
 
+// Vista normalizada del ensamblaje a mostrar: la calcula DomainPanel a partir del
+// mejor global (corrida terminada) o de la generación scrubeada, de modo que TODOS
+// los paneles (escena, resumen, κ, estratos) describan el MISMO individuo.
+export interface VistaEnsamblaje {
+  ensamblaje: ItemEnsamblaje[];
+  apt: number | null;
+  metricasDominio: Record<string, number | null>;
+  costo: number | null;
+  factible: boolean;
+  sitioNombre: string | null;
+}
+
 export function AssemblySummary({
-  gen,
-  done,
+  vista,
   especies,
   acento,
 }: {
-  gen: GenEvento | null;
-  done: DoneEvento | null;
+  vista: VistaEnsamblaje | null;
   especies: EspecieMapa;
   acento: string;
 }) {
   const chips = useMemo(() => {
-    if (!gen) return [];
-    return gen.ensamblaje
+    if (!vista) return [];
+    return vista.ensamblaje
       .map((it) => ({ esp: especies.get(it.i), C: it.C }))
       .filter((x): x is { esp: NonNullable<ReturnType<EspecieMapa["get"]>>; C: number } => !!x.esp)
       .sort((a, b) => b.esp.estrato_idx - a.esp.estrato_idx || b.C - a.C);
-  }, [gen, especies]);
+  }, [vista, especies]);
 
-  if (!gen) {
+  if (!vista) {
     return (
-      <div className="tarjeta flex h-full min-h-[220px] items-center justify-center p-5 text-sm text-white/45">
+      <div className="tarjeta flex h-full min-h-[220px] items-center justify-center p-5 text-sm text-foreground/45">
         Aquí verás el mejor ensamblaje y sus métricas.
       </div>
     );
   }
 
-  const totalInd = gen.ensamblaje.reduce((s, it) => s + it.C, 0);
-  const metricas = Object.entries(gen.metricas);
+  const totalInd = vista.ensamblaje.reduce((s, it) => s + it.C, 0);
+  const metricas = Object.entries(vista.metricasDominio);
 
   return (
     <div className="tarjeta flex flex-col gap-4 p-5">
@@ -41,16 +51,16 @@ export function AssemblySummary({
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
           Mejor ensamblaje
         </h3>
-        {done && (
-          <span className="text-xs text-white/45">sitio: {done.mejor.sitio_nombre}</span>
+        {vista.sitioNombre && (
+          <span className="text-xs text-foreground/45">sitio: {vista.sitioNombre}</span>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <Stat label="Aptitud F" valor={fmt(gen.apt_mejor)} color={acento} />
-        <Stat label="Especies" valor={String(gen.ensamblaje.length)} />
+        <Stat label="Aptitud F" valor={fmt(vista.apt)} color={acento} />
+        <Stat label="Especies" valor={String(vista.ensamblaje.length)} />
         <Stat label="Individuos" valor={String(totalInd)} />
-        <Stat label="Costo" valor={fmtDinero(gen.costo)} />
+        <Stat label="Costo" valor={fmtDinero(vista.costo)} />
       </div>
 
       <div className="flex flex-wrap gap-1.5">
@@ -59,18 +69,18 @@ export function AssemblySummary({
             key={k}
             className="rounded-lg border border-borde bg-panel-2 px-2.5 py-1 text-xs"
           >
-            <span className="text-white/55">{etiquetaMetrica(k)}</span>{" "}
-            <span className="font-mono text-white/90">{fmt(typeof v === "number" ? v : null)}</span>
+            <span className="text-foreground/55">{etiquetaMetrica(k)}</span>{" "}
+            <span className="font-mono text-foreground/90">{fmt(typeof v === "number" ? v : null)}</span>
           </span>
         ))}
         <span
           className="rounded-lg px-2.5 py-1 text-xs font-medium"
           style={{
-            background: gen.factible ? "#15803d33" : "#b91c1c33",
-            color: gen.factible ? "#86efac" : "#fca5a5",
+            background: vista.factible ? "#dcefe2" : "#fbe3e3",
+            color: vista.factible ? "#0b5f57" : "#b91c1c",
           }}
         >
-          {gen.factible ? "factible" : "inviable"}
+          {vista.factible ? "factible" : "inviable"}
         </span>
       </div>
 
@@ -82,8 +92,8 @@ export function AssemblySummary({
             title={`${esp.nombre} · ${esp.estrato}`}
           >
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: esp.color }} />
-            <span className="max-w-[140px] truncate text-white/85">{esp.nombre}</span>
-            <span className="font-mono text-white/55">×{C}</span>
+            <span className="max-w-[140px] truncate text-foreground/85">{esp.nombre}</span>
+            <span className="font-mono text-foreground/55">×{C}</span>
           </span>
         ))}
       </div>
@@ -94,8 +104,8 @@ export function AssemblySummary({
 function Stat({ label, valor, color }: { label: string; valor: string; color?: string }) {
   return (
     <div className="rounded-xl border border-borde bg-panel-2 px-3 py-2">
-      <div className="text-[11px] uppercase tracking-wide text-white/45">{label}</div>
-      <div className="font-mono text-lg" style={{ color: color ?? "#e8eef7" }}>
+      <div className="text-[11px] uppercase tracking-wide text-foreground/45">{label}</div>
+      <div className="font-mono text-lg" style={{ color: color ?? "#0e2e2b" }}>
         {valor}
       </div>
     </div>

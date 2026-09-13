@@ -1,21 +1,23 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Icono } from "@/components/Icono";
+import type { Forma } from "@/lib/types";
 
 /**
- * Mascota guía: carita + burbuja de diálogo. Bloque autocontenido que cada
+ * Mascota guía: ícono + burbuja de diálogo. Bloque autocontenido que cada
  * paso coloca donde corresponda (no es fijo, para evitar solapes y problemas
  * responsive). El texto cambia por paso; la burbuja hace crossfade.
  */
 export function GuiaMascota({
   nombre,
-  emoji,
+  forma,
   texto,
   acento,
   textoKey,
 }: {
   nombre: string;
-  emoji: string;
+  forma?: Forma;
   texto: string;
   acento: string;
   /** clave que dispara el crossfade de la burbuja al cambiar de texto */
@@ -24,14 +26,14 @@ export function GuiaMascota({
   return (
     <div className="flex items-end gap-3">
       <div
-        className="mascota-bob grid h-16 w-16 shrink-0 place-items-center rounded-full text-3xl shadow-lg"
+        className="mascota-bob grid h-16 w-16 shrink-0 place-items-center rounded-full shadow-lg"
         style={{
-          background: `radial-gradient(circle at 35% 30%, ${acento}55, ${acento}22)`,
+          background: `radial-gradient(circle at 35% 30%, ${acento}33, ${acento}14)`,
           border: `2px solid ${acento}`,
         }}
         aria-hidden
       >
-        {emoji}
+        <Icono forma={forma} size={30} style={{ color: acento }} />
       </div>
       <div className="relative min-w-0 flex-1">
         <div
@@ -40,7 +42,7 @@ export function GuiaMascota({
         >
           {nombre}
         </div>
-        <div className="relative rounded-2xl rounded-bl-sm border border-borde bg-panel-2 px-4 py-3 text-[15px] leading-snug text-white/90">
+        <div className="relative rounded-2xl rounded-bl-sm border border-borde bg-panel-2 px-4 py-3 text-[15px] leading-snug text-foreground/90">
           <AnimatePresence mode="wait">
             <motion.p
               key={textoKey ?? texto}

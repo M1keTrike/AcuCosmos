@@ -42,24 +42,63 @@ def _ensamblaje(ind):
 
 
 def _nombre_sitio(sitios, idx):
-    try:
-        fila = sitios.iloc[int(idx)]
-    except Exception:
-        return str(idx)
-    for c in ("nombre", "nombre_sitio", "sitio"):
-        if c in sitios.columns:
-            return str(fila[c])
-    return str(idx)
+    # Misma regla legible que el endpoint /sitios (nombre -> tipo -> id -> "Sitio N").
+    return servicio.nombre_sitio(sitios, idx)
 
 
-async def stream_run(dom, escenario_nombre, seed, generaciones, poblacion):
+async def stream_run(dom, escenario_nombre, seed, generaciones, poblacion,
+                     presupuesto=None, min_especies=None, max_especies=None,
+                     sitio=None, fijas=None, capacidad=None):
     esquema, cat, sitios, kap, escenarios = servicio.cargar_todo(dom)
+    # Override de la capacidad del sitio (p.ej. capacidad del filtro del acuario).
+    # Copia para no mutar la tabla cacheada (lru_cache).
+    if capacidad is not None:
+        col_cap = esquema.col("capacidad_sitio")
+        if col_cap and col_cap in sitios.columns:
+            sitios = sitios.copy()
+            sitios[col_cap] = float(capacidad)
+    n_cat = int(len(cat))
+    # Especies ancla ("base de la busqueda"): indices validos del catalogo.
+    fijas_list = []
+    if fijas:
+        for x in re.split(r"[;,]", str(fijas)):
+            x = x.strip()
+            if not x:
+                continue
+            try:
+                v = int(x)
+            except ValueError:
+                continue
+            if 0 <= v < n_cat:
+                fijas_list.append(v)
+        fijas_list = sorted(set(fijas_list))
     esc = None
     if escenario_nombre:
         esc = next((e for e in escenarios
                     if str(e.get("nombre")) == str(escenario_nombre)), None)
     if esc is None:
         esc = escenarios[0] if escenarios else {}
+
+    # Copia para no mutar el escenario cacheado (lru_cache) al aplicar overrides.
+    esc = dict(esc)
+    if presupuesto is not None:
+        esc["presupuesto"] = float(presupuesto)
+    # min/max especies del usuario (con fallback al escenario) y coherentes.
+    me_min = int(min_especies) if min_especies is not None \
+        else int(esc.get("min_especies", 3) or 3)
+    me_max = int(max_especies) if max_especies is not None \
+        else int(esc.get("max_especies", 15) or 15)
+    if me_min > me_max:
+        me_min, me_max = me_max, me_min
+    # Las anclas son obligatorias: el tope nunca puede ser menor que su numero.
+    if fijas_list:
+        me_max = max(me_max, len(fijas_list))
+    # sitio explicito ("tipo de acuario") restringe la busqueda a ese unico sitio.
+    if sitio is not None:
+        tanques = [int(sitio)]
+    else:
+        tanques = _sitios_permitidos(esc)
+
     ctx = ContextoEvaluacion(esquema, cat, sitios, kap, esc)
 
     loop = asyncio.get_running_loop()
@@ -109,11 +148,13 @@ async def stream_run(dom, escenario_nombre, seed, generaciones, poblacion):
         try:
             mejor, _hist, top_inds, top_apts, top_mets = EjecutarAG(
                 ctx,
-                tanques_permitidos=_sitios_permitidos(esc),
+                tanques_permitidos=tanques,
                 tam_poblacion=int(poblacion),
                 generaciones_max=int(generaciones),
-                min_especies=int(esc.get("min_especies", 3) or 3),
-                max_especies=int(esc.get("max_especies", 15) or 15),
+                min_especies=me_min,
+                max_especies=me_max,
+                cap_estricto=True,     # respeta Max. especies como tope duro (GUI)
+                especies_fijas=fijas_list or None,
                 verbose=False,
                 seed=seed,
                 callback=cb,

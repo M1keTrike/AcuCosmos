@@ -19,8 +19,8 @@ TEMAS = {
         "etiqueta": "Acuario ornamental",
         "emoji": "\U0001F420",                # 🐠
         "descripcion": "Disena un acuario comunitario estetico y saludable.",
-        "acento": "#38bdf8", "acento2": "#22d3ee",
-        "fondo": "#04293f", "fondo2": "#0a3a5a",
+        "acento": "#2f6fb3", "acento2": "#245a91",
+        "fondo": "#dbe9f5", "fondo2": "#c3dcef",
         "forma": "pez",
         "grupo_col": "grupo_cromatico",
         "grupo_etiqueta_col": "grupo_cromatico_nombre",
@@ -43,8 +43,8 @@ TEMAS = {
         "etiqueta": "Policultivo acuicola",
         "emoji": "\U0001F41F",                # 🐟
         "descripcion": "Optimiza un policultivo de agua dulce productivo.",
-        "acento": "#2dd4bf", "acento2": "#34d399",
-        "fondo": "#053b34", "fondo2": "#0a5048",
+        "acento": "#14a0a0", "acento2": "#0e7d7d",
+        "fondo": "#d3eded", "fondo2": "#b9e2e2",
         "forma": "pez",
         "grupo_col": "grupo",
         "tamano_col": "peso_cosecha_g",
@@ -54,8 +54,8 @@ TEMAS = {
         "etiqueta": "Huerto / policultivo",
         "emoji": "\U0001F331",                # 🌱
         "descripcion": "Compon un huerto con sinergias de companion planting.",
-        "acento": "#84cc16", "acento2": "#fbbf24",
-        "fondo": "#1a2e05", "fondo2": "#2c4a0a",
+        "acento": "#5aa63b", "acento2": "#46812d",
+        "fondo": "#e2efd6", "fondo2": "#d0e6bd",
         "forma": "planta",
         "grupo_col": "tipo",
         "tamano_col": "altura_cm_max",
@@ -65,8 +65,8 @@ TEMAS = {
         "etiqueta": "Bosque / agroforesteria",
         "emoji": "\U0001F333",                # 🌳
         "descripcion": "Reforesta maximizando CO2 y biodiversidad.",
-        "acento": "#22c55e", "acento2": "#65a30d",
-        "fondo": "#052e16", "fondo2": "#0a3d20",
+        "acento": "#2e7d4f", "acento2": "#24633e",
+        "fondo": "#dcebe1", "fondo2": "#c6e0cf",
         "forma": "arbol",
         "grupo_col": "uso",
         "grupo_split": ";",
@@ -77,8 +77,8 @@ TEMAS = {
         "etiqueta": "Granja integrada",
         "emoji": "\U0001F404",                # 🐄
         "descripcion": "Integra animales de granja por gremios complementarios.",
-        "acento": "#f59e0b", "acento2": "#fb923c",
-        "fondo": "#3a2206", "fondo2": "#52310a",
+        "acento": "#e0922b", "acento2": "#b87320",
+        "fondo": "#f5e7cf", "fondo2": "#efd9b0",
         "forma": "animal",
         "grupo_col": "grupo",
         "tamano_col": "espacio_min_m2",
@@ -87,13 +87,28 @@ TEMAS = {
 }
 
 
+# Etiqueta/unidad del rol `capacidad_sitio` por dominio (control de override; en
+# acuario = capacidad del filtro, en otros = superficie/biomasa del sitio).
+CAPACIDAD = {
+    "peces_ornamental": {"etiqueta": "Capacidad del filtro", "unidad": "g/h"},
+    "fauna_acuicola":   {"etiqueta": "Capacidad de biomasa", "unidad": "kg"},
+    "plantas_jardin":   {"etiqueta": "Superficie del sitio", "unidad": "m²"},
+    "arboles_bosque":   {"etiqueta": "Superficie del sitio", "unidad": "m²"},
+    "fauna_terrestre":  {"etiqueta": "Superficie del sitio", "unidad": "m²"},
+}
+
+
+def capacidad_meta(dom: str):
+    return CAPACIDAD.get(dom)
+
+
 def tema(dom: str) -> dict:
     if dom not in TEMAS:
         # tema neutro por si aparece un dominio nuevo sin entrada explicita
         return {
             "etiqueta": dom, "emoji": "\U0001F9EC", "descripcion": "",
-            "acento": "#38bdf8", "acento2": "#22d3ee",
-            "fondo": "#0f172a", "fondo2": "#1e293b",
+            "acento": "#0f8b7e", "acento2": "#0b5f57",
+            "fondo": "#f1f6f4", "fondo2": "#e3ece9",
             "forma": "pez", "grupo_col": None, "tamano_col": None,
             "estrato_etiquetas": {},
         }

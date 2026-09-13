@@ -2,18 +2,38 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { apiCatalogo, apiEscenarios, apiKappa } from "@/lib/api";
-import type { Catalogo, DominioMeta, Escenario, Kappa } from "@/lib/types";
+import { apiCatalogo, apiEscenarios, apiKappa, apiSitios } from "@/lib/api";
+import type {
+  Catalogo,
+  DominioMeta,
+  Escenario,
+  Kappa,
+  Metricas,
+  Sitio,
+} from "@/lib/types";
 import { useRunStream } from "@/lib/useRunStream";
 import type { EspecieMapa } from "./tipos-escena";
 import { AssemblyScene } from "./AssemblyScene";
-import { AssemblySummary } from "./AssemblySummary";
+import { AssemblySummary, type VistaEnsamblaje } from "./AssemblySummary";
 import { ConvergenceChart } from "./ConvergenceChart";
 import { GenerationScrubber } from "./GenerationScrubber";
 import { KappaHeatmap } from "./KappaHeatmap";
 import { MetricsRadar } from "./MetricsRadar";
 import { RunControls, type ConfigRun } from "./RunControls";
 import { StrataBars } from "./StrataBars";
+import { Icono } from "./Icono";
+
+// Quita las claves agregadas (n_especies/costo/factible) de las métricas del
+// evento `done` para quedarse solo con las métricas del dominio (las que se
+// pintan como chips). Las del GenEvento ya vienen sin ellas.
+function soloMetricasDominio(m: Metricas): Record<string, number | null> {
+  const out: Record<string, number | null> = {};
+  for (const [k, v] of Object.entries(m)) {
+    if (k === "n_especies" || k === "costo" || k === "factible") continue;
+    out[k] = typeof v === "number" ? v : null;
+  }
+  return out;
+}
 
 export function DomainPanel({
   dominio,
@@ -23,6 +43,7 @@ export function DomainPanel({
   onBack: () => void;
 }) {
   const [escenarios, setEscenarios] = useState<Escenario[]>([]);
+  const [sitios, setSitios] = useState<Sitio[]>([]);
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
   const [kappa, setKappa] = useState<Kappa | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -41,12 +62,14 @@ export function DomainPanel({
       apiEscenarios(dominio.id),
       apiCatalogo(dominio.id),
       apiKappa(dominio.id),
+      apiSitios(dominio.id),
     ])
-      .then(([esc, cat, kap]) => {
+      .then(([esc, cat, kap, sit]) => {
         if (!vivo) return;
         setEscenarios(esc);
         setCatalogo(cat);
         setKappa(kap);
+        setSitios(sit);
       })
       .catch((e) => vivo && setErrorCarga(String(e)))
       .finally(() => vivo && setCargando(false));
@@ -74,10 +97,33 @@ export function DomainPanel({
   }, [run.estado, run.gens.length]);
 
   const genActual = run.gens[Math.min(genIdx, run.gens.length - 1)] ?? null;
-  const ensamblaje = genActual?.ensamblaje ?? [];
-  const activas = run.done
-    ? run.done.mejor.activas.map((a) => a.i)
-    : ensamblaje.map((a) => a.i);
+
+  // Ensamblaje MOSTRADO, único para todos los paneles: el mejor global cuando la
+  // corrida terminó y el scrubber está al final; la generación scrubeada si no.
+  // Evita que "Mejor ensamblaje" (genActual) y κ/estratos (mejor global) difieran.
+  const enFinal = !!run.done && genIdx >= run.gens.length - 1;
+  const vista: VistaEnsamblaje | null =
+    enFinal && run.done
+      ? {
+          ensamblaje: run.done.mejor.activas,
+          apt: run.done.mejor.F,
+          metricasDominio: soloMetricasDominio(run.done.mejor.metricas),
+          costo: run.done.mejor.metricas.costo,
+          factible: run.done.mejor.metricas.factible,
+          sitioNombre: run.done.mejor.sitio_nombre,
+        }
+      : genActual
+        ? {
+            ensamblaje: genActual.ensamblaje,
+            apt: genActual.apt_mejor,
+            metricasDominio: genActual.metricas,
+            costo: genActual.costo,
+            factible: genActual.factible,
+            sitioNombre: run.done?.mejor.sitio_nombre ?? null,
+          }
+        : null;
+  const ensamblaje = vista?.ensamblaje ?? [];
+  const activas = ensamblaje.map((a) => a.i);
 
   const lanzar = (c: ConfigRun) =>
     run.correr({
@@ -86,6 +132,12 @@ export function DomainPanel({
       seed: c.seed,
       generaciones: c.generaciones,
       poblacion: c.poblacion,
+      presupuesto: c.presupuesto,
+      minEspecies: c.minEspecies,
+      maxEspecies: c.maxEspecies,
+      sitio: c.sitio,
+      fijas: c.fijas,
+      capacidad: c.capacidad,
     });
 
   return (
@@ -101,14 +153,23 @@ export function DomainPanel({
         <button
           type="button"
           onClick={onBack}
-          className="boton-acento rounded-full border border-borde bg-panel px-3 py-2 text-sm text-white/80"
+          className="boton-acento rounded-full border border-borde bg-panel px-3 py-2 text-sm text-foreground/80"
         >
           ← Dominios
         </button>
-        <span className="text-3xl">{dominio.emoji}</span>
+        <span
+          className="flex h-10 w-10 items-center justify-center rounded-xl border"
+          style={{
+            borderColor: `${acento}40`,
+            background: `${acento}14`,
+            color: acento,
+          }}
+        >
+          <Icono forma={dominio.tema.forma} size={22} />
+        </span>
         <div className="mr-auto">
-          <h2 className="text-xl font-semibold text-white">{dominio.etiqueta}</h2>
-          <p className="text-xs text-white/50">
+          <h2 className="text-xl font-semibold text-foreground">{dominio.etiqueta}</h2>
+          <p className="text-xs text-foreground/50">
             {dominio.n_especies} especies · {dominio.estratos.length} estratos ·{" "}
             agregación {dominio.agregacion.replace("_", " ")}
           </p>
@@ -117,7 +178,7 @@ export function DomainPanel({
       </div>
 
       {errorCarga && (
-        <div className="mb-5 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+        <div className="mb-5 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
           No se pudo cargar el dominio ({errorCarga}). ¿Está corriendo el backend?
         </div>
       )}
@@ -126,6 +187,9 @@ export function DomainPanel({
         <aside className="flex flex-col gap-5">
           <RunControls
             escenarios={escenarios}
+            sitios={sitios}
+            especies={catalogo?.especies ?? []}
+            capacidadMeta={dominio.capacidad}
             acento={acento}
             estado={run.estado}
             onCorrer={lanzar}
@@ -134,6 +198,11 @@ export function DomainPanel({
         </aside>
 
         <main className="flex min-w-0 flex-col gap-5">
+          <p className="text-xs text-foreground/45">
+            Las especies no están predefinidas: el algoritmo las elige y dosifica
+            entre las {dominio.n_especies} candidatas del catálogo, según el sitio y
+            los límites que configures.
+          </p>
           <div className="h-[360px] sm:h-[440px]">
             <AssemblyScene
               forma={dominio.tema.forma}
@@ -160,12 +229,7 @@ export function DomainPanel({
               genIdx={Math.min(genIdx, Math.max(0, run.gens.length - 1))}
               acento={acento}
             />
-            <AssemblySummary
-              gen={genActual}
-              done={run.done}
-              especies={especies}
-              acento={acento}
-            />
+            <AssemblySummary vista={vista} especies={especies} acento={acento} />
           </div>
 
           <div className="grid gap-5 xl:grid-cols-2">
@@ -185,7 +249,7 @@ export function DomainPanel({
       </div>
 
       {cargando && (
-        <p className="mt-4 text-center text-sm text-white/40">Cargando dominio…</p>
+        <p className="mt-4 text-center text-sm text-foreground/40">Cargando dominio…</p>
       )}
     </motion.div>
   );
@@ -201,10 +265,10 @@ function EstadoPill({
   error: string | null;
 }) {
   const mapa: Record<string, { txt: string; bg: string; fg: string }> = {
-    inactivo: { txt: "listo para correr", bg: "#1e2a44", fg: "#9fb2cf" },
+    inactivo: { txt: "listo para correr", bg: "#f1f6f4", fg: "#4a5c58" },
     corriendo: { txt: "evolucionando…", bg: `${acento}22`, fg: acento },
-    listo: { txt: "corrida completa", bg: "#15803d33", fg: "#86efac" },
-    error: { txt: error ?? "error", bg: "#b91c1c33", fg: "#fca5a5" },
+    listo: { txt: "corrida completa", bg: "#dcefe2", fg: "#0b5f57" },
+    error: { txt: error ?? "error", bg: "#fbe3e3", fg: "#b91c1c" },
   };
   const e = mapa[estado] ?? mapa.inactivo;
   return (
@@ -233,7 +297,7 @@ function LeyendaGrupos({ catalogo }: { catalogo: Catalogo }) {
         {catalogo.grupos.map((g) => (
           <div key={g.valor} className="flex items-center gap-2 text-sm">
             <span className="h-3 w-3 rounded-sm" style={{ background: g.color }} />
-            <span className="truncate text-white/75">{g.etiqueta}</span>
+            <span className="truncate text-foreground/75">{g.etiqueta}</span>
           </div>
         ))}
       </div>

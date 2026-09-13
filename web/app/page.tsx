@@ -15,7 +15,7 @@ export default function Home() {
         <button
           type="button"
           onClick={() => setModo("juego")}
-          className="boton-acento fixed right-4 top-4 z-40 rounded-full border border-borde bg-panel px-3 py-1.5 text-xs text-white/70"
+          className="boton-acento fixed right-4 top-4 z-40 rounded-full border border-borde bg-panel px-3 py-1.5 text-xs text-foreground/70"
           title="Volver al modo guiado"
         >
           ← Modo juego

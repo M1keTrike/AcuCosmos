@@ -46,7 +46,7 @@ export function PasoEquipo({
 
   if (!done) {
     return (
-      <p className="py-10 text-center text-white/50">No hay resultados todavía.</p>
+      <p className="py-10 text-center text-foreground/50">No hay resultados todavía.</p>
     );
   }
 
@@ -71,13 +71,13 @@ export function PasoEquipo({
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col">
       <motion.h2
         {...aparece(0)}
-        className="text-center text-2xl font-bold text-white sm:text-3xl"
+        className="text-center text-2xl font-bold text-foreground sm:text-3xl"
       >
         Tu equipo ganador
       </motion.h2>
       <motion.p
         {...aparece(0.06)}
-        className="mx-auto mt-2 max-w-lg text-center text-white/60"
+        className="mx-auto mt-2 max-w-lg text-center text-foreground/60"
       >
         {cartas.length} {narr.unidad} distintas · {totalInd} en total
       </motion.p>
@@ -114,12 +114,12 @@ export function PasoEquipo({
                 className="h-3 w-3 shrink-0 rounded-full"
                 style={{ background: esp.color }}
               />
-              <span className="truncate text-sm font-medium text-white" title={esp.nombre}>
+              <span className="truncate text-sm font-medium text-foreground" title={esp.nombre}>
                 {esp.nombre}
               </span>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-[11px] uppercase tracking-wide text-white/40">
+              <span className="text-[11px] uppercase tracking-wide text-foreground/40">
                 {esp.estrato}
               </span>
               <span className="font-mono text-lg" style={{ color: acento }}>
@@ -135,8 +135,8 @@ export function PasoEquipo({
         {...aparece(0.4)}
         className="mt-6 flex flex-wrap items-center justify-center gap-3"
       >
-        <span className="rounded-xl border border-borde bg-panel-2 px-4 py-2 text-sm text-white/80">
-          💰 Costo: <span className="font-mono text-white">${fmtDinero(costo)}</span>
+        <span className="rounded-xl border border-borde bg-panel-2 px-4 py-2 text-sm text-foreground/80">
+          💰 Costo: <span className="font-mono text-foreground">${fmtDinero(costo)}</span>
         </span>
         <motion.span
           initial={{ scale: 0.8, opacity: 0 }}
@@ -144,8 +144,8 @@ export function PasoEquipo({
           transition={{ delay: 0.48, type: "spring", stiffness: 320, damping: 18 }}
           className="rounded-xl px-4 py-2 text-sm font-medium"
           style={{
-            background: factible ? "#15803d33" : "#b91c1c33",
-            color: factible ? "#86efac" : "#fca5a5",
+            background: factible ? "#dcefe2" : "#fbe3e3",
+            color: factible ? "#0b5f57" : "#b91c1c",
           }}
         >
           {factible ? "✅ Cumple tu misión" : "⚠️ Se pasó de los límites"}
@@ -158,7 +158,7 @@ export function PasoEquipo({
           {...aparece(0.5)}
           className="rounded-2xl border border-borde bg-panel-2 p-5"
         >
-          <h3 className="text-sm font-semibold text-white">¿Quién se lleva con quién?</h3>
+          <h3 className="text-sm font-semibold text-foreground">¿Quién se lleva con quién?</h3>
           <div className="mt-3 flex flex-col gap-2">
             {relaciones.map((r, i) => (
               <Relacion
@@ -172,7 +172,7 @@ export function PasoEquipo({
               />
             ))}
             {relaciones.length === 0 && (
-              <p className="text-sm text-white/45">
+              <p className="text-sm text-foreground/45">
                 Este equipo es tranquilo: nadie destaca como gran amigo ni rival.
               </p>
             )}
@@ -183,7 +183,7 @@ export function PasoEquipo({
           {...aparece(0.56)}
           className="rounded-2xl border border-borde bg-panel-2 p-5"
         >
-          <h3 className="text-sm font-semibold text-white">Fortalezas de tu diseño</h3>
+          <h3 className="text-sm font-semibold text-foreground">Fortalezas de tu diseño</h3>
           <div className="mt-3 flex flex-col gap-3">
             {forts.map((f, i) => {
               const m = metaMetrica(f.clave);
@@ -191,14 +191,14 @@ export function PasoEquipo({
               return (
                 <div key={f.clave}>
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="text-white/80">
+                    <span className="text-foreground/80">
                       <span aria-hidden>{m.emoji}</span> {m.etiqueta}
                     </span>
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.7 + i * 0.08, duration: 0.4 }}
-                      className="font-mono text-xs text-white/50"
+                      className="font-mono text-xs text-foreground/50"
                     >
                       {pct}%
                     </motion.span>
@@ -223,7 +223,7 @@ export function PasoEquipo({
         <button
           type="button"
           onClick={onContinuar}
-          className="boton-juego rounded-2xl px-8 py-4 text-lg font-semibold text-[#04121f] shadow-lg"
+          className="boton-juego rounded-2xl px-8 py-4 text-lg font-semibold text-white shadow-lg"
           style={{ background: acento }}
         >
           ¿Cómo funcionó esto? →
@@ -258,17 +258,17 @@ function Relacion({
     >
       <span
         className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs"
-        style={{ background: amigo ? "#15803d33" : "#b91c1c33" }}
+        style={{ background: amigo ? "#dcefe2" : "#fbe3e3" }}
         aria-hidden
       >
         {amigo ? "🟢" : "🔴"}
       </span>
-      <span className="inline-flex items-center gap-1 truncate text-white/85">
+      <span className="inline-flex items-center gap-1 truncate text-foreground/85">
         <span className="h-2.5 w-2.5 rounded-full" style={{ background: ca }} />
         <span className="truncate">{a}</span>
       </span>
-      <span className="text-white/40">{amigo ? "+" : "×"}</span>
-      <span className="inline-flex items-center gap-1 truncate text-white/85">
+      <span className="text-foreground/40">{amigo ? "+" : "×"}</span>
+      <span className="inline-flex items-center gap-1 truncate text-foreground/85">
         <span className="h-2.5 w-2.5 rounded-full" style={{ background: cb }} />
         <span className="truncate">{b}</span>
       </span>

@@ -54,6 +54,12 @@ def get_kappa(dom: str):
     return servicio.kappa(dom)
 
 
+@app.get("/api/dominios/{dom}/sitios")
+def get_sitios(dom: str):
+    _verifica(dom)
+    return servicio.sitios(dom)
+
+
 @app.get("/api/run")
 async def get_run(
     dom: str = Query(...),
@@ -61,8 +67,24 @@ async def get_run(
     seed: int | None = Query(None),
     generaciones: int = Query(120, ge=10, le=400),
     poblacion: int = Query(60, ge=20, le=200),
+    # Overrides opcionales del escenario (parametros configurables por el usuario).
+    # Si se omiten, se usa el valor por defecto del escenario.
+    presupuesto: float | None = Query(None, ge=0),
+    min_especies: int | None = Query(None, ge=1, le=60),
+    max_especies: int | None = Query(None, ge=1, le=60),
+    sitio: int | None = Query(None, ge=0),
+    # Especies ancla ("base de la busqueda"): indices del catalogo, separados por
+    # coma, que el AG siempre incluira. Vacio => el AG elige libremente.
+    fijas: str | None = Query(None),
+    # Override de la capacidad del sitio (filtro en acuario / superficie en otros).
+    capacidad: float | None = Query(None, ge=0),
 ):
     _verifica(dom)
     return EventSourceResponse(
-        streaming.stream_run(dom, escenario, seed, generaciones, poblacion)
+        streaming.stream_run(
+            dom, escenario, seed, generaciones, poblacion,
+            presupuesto=presupuesto, min_especies=min_especies,
+            max_especies=max_especies, sitio=sitio, fijas=fijas,
+            capacidad=capacidad,
+        )
     )

@@ -27,3 +27,24 @@ const ETIQUETAS: Record<string, string> = {
 export function etiquetaMetrica(clave: string): string {
   return ETIQUETAS[clave] ?? clave;
 }
+
+// Convierte un nombre técnico ("E1_comunitario", "reforestacion_humeda") en algo
+// legible si el escenario no trae una `etiqueta` propia: quita un prefijo de código
+// tipo "E1_", reemplaza guiones bajos por espacios y capitaliza.
+export function prettyNombre(nombre: string): string {
+  const sinCodigo = nombre.replace(/^[A-Za-z]?\d+[_-]/, "");
+  const limpio = sinCodigo.replace(/[_-]+/g, " ").trim();
+  if (!limpio) return nombre;
+  return limpio.charAt(0).toUpperCase() + limpio.slice(1);
+}
+
+// Etiqueta a mostrar para un escenario: usa `etiqueta` si existe, si no embellece
+// el `nombre`. Acepta un índice de respaldo para escenarios sin nombre.
+export function nombreEscenario(
+  e: { etiqueta?: string; nombre?: string },
+  i = 0
+): string {
+  if (e.etiqueta && e.etiqueta.trim()) return e.etiqueta;
+  if (e.nombre && e.nombre.trim()) return prettyNombre(e.nombre);
+  return `Escenario ${i + 1}`;
+}

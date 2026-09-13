@@ -35,28 +35,28 @@ export function ConvergenceChart({
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
           Convergencia del AG
         </h3>
-        <span className="text-xs text-white/45">aptitud F por generación</span>
+        <span className="text-xs text-foreground/45">aptitud F por generación</span>
       </div>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 6, right: 10, bottom: 0, left: -18 }}>
-            <CartesianGrid stroke="#1e2a44" strokeDasharray="3 3" />
+            <CartesianGrid stroke="#c9d6d1" strokeDasharray="3 3" />
             <XAxis
               dataKey="gen"
-              stroke="#5b6c8a"
+              stroke="#4a5c58"
               fontSize={11}
               tickLine={false}
               minTickGap={24}
             />
-            <YAxis stroke="#5b6c8a" fontSize={11} tickLine={false} width={48} />
+            <YAxis stroke="#4a5c58" fontSize={11} tickLine={false} width={48} />
             <Tooltip
               contentStyle={{
-                background: "#0d1424",
-                border: "1px solid #1e2a44",
+                background: "#ffffff",
+                border: "1px solid #c9d6d1",
                 borderRadius: 10,
                 fontSize: 12,
               }}
-              labelStyle={{ color: "#8aa0c0" }}
+              labelStyle={{ color: "#4a5c58" }}
               labelFormatter={(v) => `Generación ${v}`}
             />
             {genMarca !== undefined && (
@@ -66,7 +66,7 @@ export function ConvergenceChart({
               type="monotone"
               dataKey="peor"
               name="peor"
-              stroke="#64748b"
+              stroke="#94a3b8"
               strokeWidth={1}
               dot={false}
               isAnimationActive={false}
@@ -75,7 +75,7 @@ export function ConvergenceChart({
               type="monotone"
               dataKey="promedio"
               name="promedio"
-              stroke="#a78bfa"
+              stroke="#e0922b"
               strokeWidth={1.5}
               dot={false}
               isAnimationActive={false}
@@ -92,10 +92,10 @@ export function ConvergenceChart({
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-1 flex gap-4 text-xs text-white/55">
+      <div className="mt-1 flex gap-4 text-xs text-foreground/55">
         <Leyenda color={acento} label="mejor" />
-        <Leyenda color="#a78bfa" label="promedio" />
-        <Leyenda color="#64748b" label="peor" />
+        <Leyenda color="#e0922b" label="promedio" />
+        <Leyenda color="#94a3b8" label="peor" />
       </div>
     </div>
   );

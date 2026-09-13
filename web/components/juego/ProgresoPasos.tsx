@@ -26,7 +26,7 @@ export function ProgresoPasos({ actual, acento }: { actual: PasoId; acento: stri
                 className="grid h-7 w-7 place-items-center rounded-full text-xs font-semibold transition-colors"
                 style={{
                   background: activo || hecho ? acento : "var(--panel-2)",
-                  color: activo || hecho ? "#04121f" : "var(--muted)",
+                  color: activo || hecho ? "#ffffff" : "var(--muted)",
                   border: `1px solid ${activo || hecho ? acento : "var(--borde)"}`,
                 }}
               >
@@ -34,7 +34,7 @@ export function ProgresoPasos({ actual, acento }: { actual: PasoId; acento: stri
               </span>
               <span
                 className={`hidden text-sm sm:inline ${
-                  activo ? "font-semibold text-white" : "text-white/55"
+                  activo ? "font-semibold text-foreground" : "text-foreground/55"
                 }`}
               >
                 {p.etiqueta}

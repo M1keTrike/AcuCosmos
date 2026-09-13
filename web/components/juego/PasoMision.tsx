@@ -12,6 +12,8 @@ import { useEffect } from "react";
 import type { DominioMeta, Escenario } from "@/lib/types";
 import type { Narrativa } from "@/lib/narrativa";
 import { briefingDeEscenario } from "@/lib/juego";
+import { Icono } from "@/components/Icono";
+import { nombreEscenario } from "@/lib/format";
 
 const EASE = [0.23, 1, 0.32, 1] as const;
 
@@ -48,12 +50,20 @@ export function PasoMision({
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col">
       <motion.div {...aparece(0)} className="flex items-center gap-3">
-        <span className="text-4xl" aria-hidden>
-          {dominio.emoji}
+        <span
+          className="flex h-12 w-12 items-center justify-center rounded-xl border"
+          style={{
+            borderColor: `${acento}55`,
+            background: `${acento}1a`,
+            color: dominio.tema.acento2,
+          }}
+          aria-hidden
+        >
+          <Icono forma={dominio.tema.forma} size={28} />
         </span>
         <div>
-          <h2 className="text-2xl font-bold text-white">{narr.misionTitulo}</h2>
-          <p className="text-sm text-white/55">Elige tu reto y empezamos.</p>
+          <h2 className="text-2xl font-bold text-foreground">{narr.misionTitulo}</h2>
+          <p className="text-sm text-foreground/55">Elige tu reto y empezamos.</p>
         </div>
       </motion.div>
 
@@ -100,7 +110,7 @@ export function PasoMision({
                   style={{
                     border: `2px solid ${activo ? acento : "var(--borde)"}`,
                     background: activo ? acento : "transparent",
-                    color: "#04121f",
+                    color: "#ffffff",
                     transition: "background 180ms, border-color 180ms",
                   }}
                 >
@@ -117,7 +127,7 @@ export function PasoMision({
                     )}
                   </AnimatePresence>
                 </span>
-                <span className="font-medium capitalize text-white">{nombre}</span>
+                <span className="font-medium text-foreground">{nombreEscenario(e, i)}</span>
               </motion.button>
             );
           })}
@@ -160,7 +170,7 @@ export function PasoMision({
         <button
           type="button"
           onClick={onAtras}
-          className="boton-acento rounded-full border border-borde bg-panel px-4 py-2.5 text-sm text-white/70"
+          className="boton-acento rounded-full border border-borde bg-panel px-4 py-2.5 text-sm text-foreground/70"
         >
           ← Otro mundo
         </button>
@@ -168,7 +178,7 @@ export function PasoMision({
           type="button"
           onClick={onComenzar}
           disabled={cargando || !escenarioSel}
-          className="boton-juego rounded-2xl px-8 py-4 text-lg font-semibold text-[#04121f] shadow-lg"
+          className="boton-juego rounded-2xl px-8 py-4 text-lg font-semibold text-white shadow-lg"
           style={{ background: acento }}
         >
           ¡Que evolucione! →
@@ -192,10 +202,10 @@ function Dato({
       <div className="text-2xl" aria-hidden>
         {emoji}
       </div>
-      <div className="mt-1 text-[11px] uppercase tracking-wide text-white/45">
+      <div className="mt-1 text-[11px] uppercase tracking-wide text-foreground/45">
         {etiqueta}
       </div>
-      <div className="font-mono text-lg text-white">{children}</div>
+      <div className="font-mono text-lg text-foreground">{children}</div>
     </div>
   );
 }

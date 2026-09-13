@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from src.cromosoma import CrearIndividuoVacio, EspeciesActivas
 
@@ -20,11 +20,17 @@ def FuncionInicializacion(tam_poblacion: int, catalogo: pd.DataFrame,
                           tanques: pd.DataFrame, esquema,
                           min_especies: int = 3,
                           max_especies: int = 15,
-                          tanques_permitidos: List[int] = None
+                          tanques_permitidos: List[int] = None,
+                          especies_fijas: Optional[List[int]] = None
                           ) -> List[Dict]:
     n_cat = len(catalogo)
     if tanques_permitidos is None:
         tanques_permitidos = list(range(len(tanques)))
+    # Especies ancla (base de la busqueda): siempre presentes. Default None/[] =>
+    # camino byte-identico al golden.
+    fijas = sorted({int(i) for i in especies_fijas if 0 <= int(i) < n_cat}) \
+        if especies_fijas else []
+    no_fijas = [i for i in range(n_cat) if i not in set(fijas)]
     poblacion = []
     for idx in range(tam_poblacion):
         ind = CrearIndividuoVacio(n_cat)
@@ -33,12 +39,19 @@ def FuncionInicializacion(tam_poblacion: int, catalogo: pd.DataFrame,
         else:
             ind['tanque'] = int(np.random.choice(tanques_permitidos))
         k = np.random.randint(min_especies, max_especies + 1)
-        idx_sp = np.random.choice(n_cat, size=k, replace=False)
+        if fijas:
+            k = max(k, len(fijas))
+            n_extra = min(k - len(fijas), len(no_fijas))
+            extra = (np.random.choice(no_fijas, size=n_extra, replace=False)
+                     if n_extra > 0 else [])
+            idx_sp = np.array(fijas + [int(x) for x in extra], dtype=int)
+        else:
+            idx_sp = np.random.choice(n_cat, size=k, replace=False)
         ind['B'][idx_sp] = 1
         for i in idx_sp:
             c_min = _cmin(catalogo, esquema, i)
             ind['C'][i] = int(np.random.randint(c_min, max(c_min + 1, 2 * c_min + 1)))
-        alpha = np.ones(k)
+        alpha = np.ones(len(idx_sp))
         d = np.random.dirichlet(alpha)
         for pos, i in enumerate(idx_sp):
             ind['D'][i] = float(d[pos])
@@ -48,7 +61,10 @@ def FuncionInicializacion(tam_poblacion: int, catalogo: pd.DataFrame,
 
 def FuncionReparacion(individuo: Dict, catalogo: pd.DataFrame,
                       tanques: pd.DataFrame, esquema,
-                      tanques_permitidos: List[int] = None) -> Dict:
+                      tanques_permitidos: List[int] = None,
+                      max_especies: Optional[int] = None,
+                      min_especies: Optional[int] = None,
+                      especies_fijas: Optional[List[int]] = None) -> Dict:
     n_cat = len(catalogo)
     n_tanques = len(tanques)
 
@@ -71,6 +87,51 @@ def FuncionReparacion(individuo: Dict, catalogo: pd.DataFrame,
         individuo['C'][i] = _cmin(catalogo, esquema, i)
         individuo['D'][i] = 1.0
         activas = [i]
+
+    # Especies ancla (base de la busqueda fijada por el usuario): SIEMPRE activas.
+    # Default None/[] => sin anclas (camino byte-identico al golden).
+    fijas_set = {int(i) for i in especies_fijas if 0 <= int(i) < n_cat} \
+        if especies_fijas else set()
+    if fijas_set:
+        for i in fijas_set:
+            if individuo['B'][i] == 0:
+                individuo['B'][i] = 1
+                individuo['C'][i] = _cmin(catalogo, esquema, i)
+                individuo['D'][i] = 0.05
+        activas = EspeciesActivas(individuo)
+
+    # Tope/piso duros opcionales de riqueza. Default None => sin limite (camino
+    # byte-identico al golden). Si llegan ambos y min>max, se prioriza el tope.
+    if (min_especies is not None and max_especies is not None
+            and min_especies > max_especies):
+        min_especies = max_especies
+
+    # Tope duro (max_especies): descarta las activas NO ancla de menor proporcion
+    # D (desempate por indice menor) hasta cumplirlo; nunca quita una ancla.
+    if max_especies is not None and len(activas) > max_especies:
+        candidatas = [i for i in activas if i not in fijas_set]
+        sobran = min(len(activas) - max_especies, len(candidatas))
+        descartar = sorted(candidatas,
+                           key=lambda i: (float(individuo['D'][i]), i))[:sobran]
+        for i in descartar:
+            individuo['B'][i] = 0
+            individuo['C'][i] = 0
+            individuo['D'][i] = 0.0
+        activas = EspeciesActivas(individuo)
+
+    # Piso duro (min_especies): activa especies inactivas (al azar) hasta el
+    # minimo, acotado por las disponibles en el catalogo.
+    if min_especies is not None and len(activas) < min_especies:
+        inactivas = [i for i in range(n_cat) if individuo['B'][i] == 0]
+        faltan = min(min_especies - len(activas), len(inactivas))
+        if faltan > 0:
+            nuevas = np.random.choice(inactivas, size=faltan, replace=False)
+            for i in nuevas:
+                i = int(i)
+                individuo['B'][i] = 1
+                individuo['C'][i] = _cmin(catalogo, esquema, i)
+                individuo['D'][i] = 0.05
+            activas = EspeciesActivas(individuo)
 
     suma_d = float(sum(individuo['D'][i] for i in activas))
     if suma_d <= 1e-12:
@@ -129,7 +190,10 @@ def CopiarIndividuo(individuo: Dict) -> Dict:
 def CruzaUniforme(padre_a: Dict, padre_b: Dict,
                   catalogo: pd.DataFrame,
                   tanques: pd.DataFrame, esquema,
-                  tanques_permitidos: List[int] = None
+                  tanques_permitidos: List[int] = None,
+                  max_especies: Optional[int] = None,
+                  min_especies: Optional[int] = None,
+                  especies_fijas: Optional[List[int]] = None
                   ) -> Tuple[Dict, Dict]:
     n_cat = len(padre_a['B'])
     hijo_1 = CrearIndividuoVacio(n_cat)
@@ -160,9 +224,11 @@ def CruzaUniforme(padre_a: Dict, padre_b: Dict,
             hijo_2['D'][i] = padre_a['D'][i]
 
     hijo_1 = FuncionReparacion(hijo_1, catalogo, tanques, esquema,
-                               tanques_permitidos)
+                               tanques_permitidos, max_especies, min_especies,
+                               especies_fijas)
     hijo_2 = FuncionReparacion(hijo_2, catalogo, tanques, esquema,
-                               tanques_permitidos)
+                               tanques_permitidos, max_especies, min_especies,
+                               especies_fijas)
     return hijo_1, hijo_2
 
 
@@ -170,7 +236,10 @@ def FuncionMutacion(individuo: Dict, catalogo: pd.DataFrame,
                     tanques: pd.DataFrame, esquema,
                     p_m1: float = 0.15, p_m2: float = 0.10,
                     p_m3: float = 0.15, p_m4: float = 0.15,
-                    tanques_permitidos: List[int] = None) -> Dict:
+                    tanques_permitidos: List[int] = None,
+                    max_especies: Optional[int] = None,
+                    min_especies: Optional[int] = None,
+                    especies_fijas: Optional[List[int]] = None) -> Dict:
     n_cat = len(catalogo)
     n_tanques = len(tanques)
     if tanques_permitidos is None:
@@ -211,7 +280,8 @@ def FuncionMutacion(individuo: Dict, catalogo: pd.DataFrame,
             individuo['D'][j] = float(individuo['D'][j]) + eps
 
     individuo = FuncionReparacion(individuo, catalogo, tanques, esquema,
-                                  tanques_permitidos)
+                                  tanques_permitidos, max_especies, min_especies,
+                                  especies_fijas)
     return individuo
 
 

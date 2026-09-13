@@ -25,16 +25,33 @@ export interface DominioMeta {
   agregacion: string;
   n_especies: number;
   estratos: EstratoMeta[];
+  capacidad?: CapacidadMeta | null;
   tema: TemaResumen;
   error?: string;
 }
 
+export interface CapacidadMeta {
+  etiqueta: string;
+  unidad: string;
+}
+
 export interface Escenario {
   nombre?: string;
+  etiqueta?: string;
+  descripcion?: string;
   presupuesto?: number | null;
   min_especies?: number | null;
   max_especies?: number | null;
+  sitios_permitidos?: number[] | null;
+  tanques_permitidos?: number[] | null;
   [k: string]: unknown;
+}
+
+export interface Sitio {
+  idx: number;
+  nombre: string;
+  detalle?: string | null;
+  capacidad?: number | null;
 }
 
 export interface EspecieCat {

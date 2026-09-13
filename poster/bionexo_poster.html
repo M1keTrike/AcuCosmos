@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>BioNexo — Póster 60×90</title>
+<style>
+/* ============================ FUENTES ============================ */
+@font-face{font-family:'YoungSerif';src:url('fonts/YoungSerif-Regular.ttf') format('truetype');font-weight:400}
+@font-face{font-family:'BigShoulders';src:url('fonts/BigShoulders-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'WorkSans';src:url('fonts/WorkSans-Regular.ttf') format('truetype');font-weight:400}
+@font-face{font-family:'WorkSans';src:url('fonts/WorkSans-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'WorkSans';src:url('fonts/WorkSans-Italic.ttf') format('truetype');font-weight:400;font-style:italic}
+@font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-Regular.ttf') format('truetype');font-weight:400}
+@font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'InstrumentSerif';src:url('fonts/InstrumentSerif-Italic.ttf') format('truetype');font-weight:400;font-style:italic}
+
+/* ============================ PALETA ============================ */
+:root{
+  --bone:#F1ECDF; --bone2:#E8E1CF; --panel:#F6F2E8;
+  --ink:#1C1B16; --ink2:#5B5547; --ink3:#8A8270;
+  --line:#CBC2AD; --line2:#DAD2BF;
+  --signal:#B23A1E;
+  --d-acuario:#1B6E68; --d-acuicola:#2F587C; --d-huerto:#6C7A33;
+  --d-bosque:#2E5230; --d-granja:#A35A2A;
+  --serif:'YoungSerif',serif; --sans:'WorkSans',sans-serif;
+  --mono:'JBMono',monospace; --it:'InstrumentSerif',serif; --disp:'BigShoulders',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+@page{size:600mm 900mm;margin:0}
+html,body{background:var(--bone)}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+
+.poster{
+  position:relative;width:600mm;height:900mm;background:var(--bone);
+  padding:21mm 20mm 16mm;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+/* sutil textura de papel */
+.poster::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(120,110,80,.05), transparent 60%),
+    radial-gradient(circle at 82% 78%, rgba(120,110,80,.045), transparent 55%);
+}
+/* marco lámina */
+.frame{position:absolute;inset:11mm;border:.4mm solid var(--line);pointer-events:none}
+.crop{position:absolute;width:7mm;height:7mm;pointer-events:none}
+.crop::before,.crop::after{content:"";position:absolute;background:var(--ink2)}
+.crop::before{width:7mm;height:.4mm;top:0;left:0}
+.crop::after{height:7mm;width:.4mm;top:0;left:0}
+.crop.tl{top:7mm;left:7mm}
+.crop.tr{top:7mm;right:7mm;transform:scaleX(-1)}
+.crop.bl{bottom:7mm;left:7mm;transform:scaleY(-1)}
+.crop.br{bottom:7mm;right:7mm;transform:scale(-1,-1)}
+.platecode{position:absolute;right:6.2mm;top:50%;transform:rotate(90deg);transform-origin:right center;
+  font-family:var(--mono);font-size:2.7mm;letter-spacing:.18em;color:var(--ink3);white-space:nowrap}
+
+.content{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;justify-content:space-between}
+.head{display:flex;flex-direction:column}
+
+/* ============================ MASTHEAD ============================ */
+.masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:10mm}
+.eyebrow{font-family:var(--mono);font-size:3.1mm;letter-spacing:.30em;color:var(--ink2);
+  text-transform:uppercase;margin-bottom:3mm}
+.title{font-family:var(--serif);font-size:43mm;line-height:.86;letter-spacing:-.01em;color:var(--ink)}
+.title .x{color:var(--signal)}
+.subtitle{font-family:var(--it);font-style:italic;font-size:8.6mm;line-height:1.04;color:var(--ink2);
+  margin-top:5mm;max-width:330mm}
+.identity{text-align:right;min-width:150mm;padding-bottom:1mm}
+.id-block{border-right:.5mm solid var(--ink);padding-right:6mm}
+.id-uni{font-family:var(--sans);font-weight:700;font-size:4.0mm;letter-spacing:.02em;line-height:1.15;text-transform:uppercase}
+.id-line{font-family:var(--mono);font-size:3.0mm;letter-spacing:.10em;color:var(--ink2);margin-top:2.4mm}
+.id-auth{font-family:var(--sans);font-size:3.5mm;line-height:1.45;color:var(--ink);margin-top:5mm}
+.id-auth b{font-weight:700}
+.id-role{font-family:var(--mono);font-size:2.8mm;letter-spacing:.06em;color:var(--ink3);margin-top:1mm}
+
+.rule-d{height:0;border-top:.7mm solid var(--ink);border-bottom:.3mm solid var(--ink);
+  margin:6mm 0 0;position:relative}
+.rule-d::after{content:"";position:absolute;left:0;top:-.7mm;height:1.7mm;width:60mm;border-top:.7mm solid var(--signal)}
+
+/* thesis band */
+.thesis{display:flex;align-items:center;gap:7mm;padding:5.5mm 0 6mm}
+.thesis .big{font-family:var(--serif);font-size:9.2mm;line-height:1.0;color:var(--ink);white-space:nowrap}
+.thesis .small{font-family:var(--sans);font-size:4.3mm;line-height:1.32;color:var(--ink2);max-width:300mm}
+.thesis .small b{color:var(--ink);font-weight:700}
+.tdot{width:2.6mm;height:2.6mm;border-radius:50%;background:var(--signal);flex:none}
+
+/* ============================ GRID PRINCIPAL ============================ */
+.body{display:grid;grid-template-columns:1fr 1fr;gap:9mm;min-height:0}
+.col{display:flex;flex-direction:column;gap:8mm;min-height:0;justify-content:space-between}
+
+/* encabezado de sección */
+.sec{display:flex;align-items:center;gap:3mm;margin-bottom:3.4mm}
+.sec .n{font-family:var(--mono);font-weight:700;font-size:3.4mm;color:var(--signal);letter-spacing:.04em}
+.sec .t{font-family:var(--sans);font-weight:700;font-size:4.5mm;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.sec .r{flex:1;height:.35mm;background:var(--line)}
+
+p.lead{font-family:var(--sans);font-size:4.15mm;line-height:1.4;color:var(--ink)}
+p.lead b{font-weight:700}
+.muted{color:var(--ink2)}
+.kw{font-family:var(--mono);font-size:3.5mm;background:var(--bone2);padding:.3mm 1.4mm;border-radius:1mm;color:var(--ink)}
+
+/* quote / patrón abstracto */
+.quote{position:relative;background:var(--panel);border-left:1.4mm solid var(--signal);
+  padding:5mm 6mm 5mm;margin-top:1mm}
+.quote .q{font-family:var(--it);font-style:italic;font-size:5.2mm;line-height:1.26;color:var(--ink)}
+.quote .q b{font-style:normal;font-weight:400;font-family:var(--sans);font-weight:700}
+.quote .cap{font-family:var(--mono);font-size:2.8mm;letter-spacing:.12em;color:var(--ink3);
+  text-transform:uppercase;margin-top:3.4mm}
+
+/* stat callout */
+.stat{display:flex;align-items:center;gap:6mm;margin-top:5mm;padding:1mm 0}
+.stat .num{font-family:var(--disp);font-weight:700;font-size:30mm;line-height:.8;color:var(--ink);letter-spacing:-.01em}
+.stat .num sup{font-size:11mm;font-family:var(--disp);vertical-align:super}
+.stat .txt{font-family:var(--sans);font-size:3.7mm;line-height:1.34;color:var(--ink2)}
+.stat .txt b{color:var(--ink);font-weight:700}
+
+/* ===== diagramas (cajas) ===== */
+.diagcap{font-family:var(--mono);font-size:2.8mm;letter-spacing:.12em;color:var(--ink3);
+  text-transform:uppercase;margin-bottom:2.6mm;display:flex;justify-content:space-between}
+.box{border:.45mm solid var(--ink);background:var(--panel);border-radius:1.5mm;padding:4.8mm 5mm}
+.box.eng{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+.box .bt{font-family:var(--sans);font-weight:700;font-size:4.2mm;letter-spacing:.06em;text-transform:uppercase}
+.box .bs{font-family:var(--mono);font-size:3.1mm;line-height:1.5;color:var(--ink2);margin-top:1.6mm}
+.box.eng .bs{color:#C9C2AE}
+.box .tagr{float:right;font-family:var(--mono);font-size:2.7mm;letter-spacing:.08em;
+  border:.35mm solid currentColor;border-radius:6mm;padding:.4mm 2.2mm;opacity:.8}
+.chips2{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+.chip{border:.45mm dashed var(--ink2);border-radius:1.5mm;padding:2.8mm 3mm;text-align:center;background:rgba(255,255,255,.25)}
+.chip .ct{font-family:var(--sans);font-weight:700;font-size:3.7mm;letter-spacing:.04em}
+.chip .cs{font-family:var(--mono);font-size:2.7mm;color:var(--ink2);margin-top:.8mm;letter-spacing:.04em}
+.arrow{display:flex;justify-content:center;align-items:center;height:11mm;position:relative}
+.arrow svg{height:11mm}
+.arrow .albl{position:absolute;left:50%;transform:translateX(4mm);font-family:var(--mono);
+  font-size:2.7mm;color:var(--ink2);white-space:nowrap}
+.sidetag{writing-mode:vertical-rl;font-family:var(--mono);font-size:2.8mm;letter-spacing:.14em;
+  color:var(--ink3);text-transform:uppercase}
+
+/* ===== cromosoma ===== */
+.chrom{display:flex;align-items:stretch;gap:2.5mm;margin-top:1mm}
+.gene{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:.45mm solid var(--ink);border-radius:1.2mm;padding:2mm 2.6mm;background:var(--ink);color:var(--bone)}
+.gene .gl{font-family:var(--mono);font-size:2.5mm;letter-spacing:.06em;opacity:.75}
+.gene .gv{font-family:var(--disp);font-weight:700;font-size:8mm;line-height:.9}
+.btrack{flex:1;display:flex;flex-direction:column;gap:1.6mm;justify-content:center}
+.bcells{display:grid;grid-template-columns:repeat(24,1fr);gap:1mm}
+.bc{aspect-ratio:1;border-radius:.6mm;background:var(--bone2);border:.3mm solid var(--line)}
+.bc.on{background:var(--ink);border-color:var(--ink)}
+.bc.on.s{background:var(--signal);border-color:var(--signal)}
+.blabel{font-family:var(--mono);font-size:2.7mm;letter-spacing:.04em;color:var(--ink2);display:flex;justify-content:space-between}
+.dbars{display:flex;align-items:flex-end;gap:1.4mm;height:13mm;margin-top:1mm;
+  border-bottom:.4mm solid var(--ink2);padding-bottom:0}
+.dbar{width:5mm;background:var(--d-acuario);border-radius:.6mm .6mm 0 0}
+.legend{display:flex;gap:5mm;flex-wrap:wrap;margin-top:3mm}
+.legend span{font-family:var(--mono);font-size:2.9mm;color:var(--ink2);letter-spacing:.02em}
+.legend b{color:var(--ink);font-weight:700}
+
+/* ===== pipeline ===== */
+.flow{display:flex;flex-direction:column;gap:0}
+.fstep{display:flex;align-items:center;gap:3.5mm;padding:2.4mm 0}
+.fnum{font-family:var(--mono);font-weight:700;font-size:3mm;color:var(--bone);background:var(--ink);
+  width:6.6mm;height:6.6mm;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.ftxt{font-family:var(--sans);font-size:3.7mm;line-height:1.2;color:var(--ink)}
+.ftxt b{font-weight:700}
+.ftxt .mono{font-family:var(--mono);font-size:3.2mm;color:var(--ink2)}
+.fline{width:6.6mm;display:flex;justify-content:center}
+.fconn{height:3mm;width:.5mm;background:var(--line);margin:0 auto}
+.fout{display:flex;gap:4mm;margin-top:2mm;padding-left:10mm}
+.pill{font-family:var(--mono);font-size:3.1mm;border:.45mm solid var(--ink);border-radius:6mm;
+  padding:1mm 3.4mm;background:var(--panel)}
+.pill.red{border-color:var(--signal);color:var(--signal)}
+
+/* ===== agreg / penaliz ===== */
+.twolist{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
+.tl h4{font-family:var(--sans);font-weight:700;font-size:3.5mm;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink2);margin-bottom:2.4mm;border-bottom:.35mm solid var(--line);padding-bottom:1.4mm}
+.tl ul{list-style:none}
+.tl li{font-family:var(--mono);font-size:3.2mm;line-height:1.62;color:var(--ink)}
+.tl li b{color:var(--signal);font-weight:700}
+.tl .note{font-family:var(--sans);font-size:3.2mm;color:var(--ink2);line-height:1.3;margin-top:2mm;font-style:italic}
+.formula{font-family:var(--mono);font-size:3.5mm;background:var(--ink);color:var(--bone);
+  padding:1.5mm 3mm;border-radius:1mm;margin-top:2.5mm;display:inline-block;letter-spacing:.02em}
+
+/* ===== ciclo evolutivo ===== */
+.cycle{display:flex;align-items:center;gap:0;flex-wrap:nowrap;margin-top:1mm}
+.cstep{flex:1;text-align:center}
+.cstep .cg{height:9mm;display:flex;align-items:center;justify-content:center}
+.cstep .cl{font-family:var(--sans);font-weight:700;font-size:3mm;line-height:1.05;margin-top:1mm}
+.cstep .cs{font-family:var(--mono);font-size:2.5mm;color:var(--ink2);margin-top:.4mm}
+.cArrow{flex:none;width:4mm;color:var(--ink3);display:flex;justify-content:center}
+.cfeat{display:flex;gap:5mm;margin-top:3.5mm;justify-content:center}
+.cfeat span{font-family:var(--mono);font-size:2.9mm;color:var(--ink2)}
+.cfeat b{color:var(--ink);font-weight:700}
+
+/* ============================ KB STRIP ============================ */
+.kbstrip{border-top:.5mm solid var(--ink);border-bottom:.35mm solid var(--line);padding:5.5mm 0 6mm}
+.kbhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5mm}
+.kbhead .t{font-family:var(--sans);font-weight:700;font-size:4.5mm;letter-spacing:.14em;text-transform:uppercase}
+.kbhead .t span{color:var(--signal);font-family:var(--mono);margin-right:2mm}
+.kbhead .s{font-family:var(--it);font-style:italic;font-size:5mm;color:var(--ink2)}
+.kbflow{display:flex;align-items:stretch;gap:0}
+.kbchip{flex:1;text-align:center;padding:0 3.5mm}
+.kbchip .kt{font-family:var(--sans);font-weight:700;font-size:3.9mm;letter-spacing:.02em}
+.kbchip .ks{font-family:var(--mono);font-size:2.85mm;color:var(--ink2);margin-top:1.6mm;line-height:1.45}
+.kbsep{flex:none;font-family:var(--mono);font-size:5.5mm;color:var(--ink3);display:flex;align-items:center;padding-top:0}
+.kbbottom{display:flex;justify-content:space-between;align-items:center;margin-top:5.5mm;gap:9mm}
+.kbnote{font-family:var(--sans);font-size:3.4mm;color:var(--ink2);line-height:1.34;max-width:175mm}
+.kbnote b{color:var(--ink);font-weight:700}
+.recipe{display:flex;align-items:center;gap:2.6mm;font-family:var(--mono);font-size:3.05mm;color:var(--ink);white-space:nowrap}
+.recipe .rn{background:var(--signal);color:#fff;width:5.4mm;height:5.4mm;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:3mm;flex:none}
+.recipe .ra{color:var(--ink3);font-size:4mm}
+
+/* ============================ BANDA DOMINIOS ============================ */
+.domains{margin-top:0}
+.dgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:.45mm solid var(--ink);
+  border-radius:2mm;overflow:hidden;background:var(--panel)}
+.dcell{padding:0 0 4.5mm;border-right:.4mm solid var(--line);display:flex;flex-direction:column;align-items:center;text-align:center}
+.dcell:last-child{border-right:none}
+.dtop{height:2.6mm;width:100%}
+.dicon{height:28mm;display:flex;align-items:center;justify-content:center;margin-top:5mm}
+.dcode{font-family:var(--mono);font-size:2.85mm;letter-spacing:.02em;margin-top:2mm;font-weight:700}
+.dname{font-family:var(--serif);font-size:5mm;line-height:1.02;margin-top:2.2mm;color:var(--ink);padding:0 3mm}
+.dcount{font-family:var(--mono);font-size:2.9mm;color:var(--ink2);margin-top:2.4mm;letter-spacing:.02em}
+.dobj{font-family:var(--sans);font-size:3.35mm;line-height:1.28;color:var(--ink);margin-top:2.8mm;padding:0 5mm;flex:1}
+.dagg{font-family:var(--mono);font-weight:700;font-size:2.7mm;letter-spacing:.14em;color:#fff;
+  padding:1mm 3.4mm;border-radius:6mm;margin-top:3mm}
+
+/* ============================ RESULTADOS / CONCLUSIONES ============================ */
+.lower{display:grid;grid-template-columns:1.05fr 1fr;gap:9mm;margin-top:6.5mm}
+.chartwrap{display:flex;gap:5mm;align-items:stretch}
+.chart{flex:1}
+.resbul{list-style:none;display:flex;flex-direction:column;gap:2.6mm;margin-top:1mm}
+.resbul li{font-family:var(--sans);font-size:3.7mm;line-height:1.26;color:var(--ink);
+  display:flex;gap:3mm;align-items:flex-start}
+.resbul li::before{content:"";width:2.4mm;height:2.4mm;background:var(--signal);margin-top:1.4mm;flex:none;border-radius:.4mm;transform:rotate(45deg)}
+.resbul li b{font-weight:700}
+.resbul .mono{font-family:var(--mono);font-size:3.3mm}
+.golden{margin-top:4mm;border:.45mm solid var(--ink);border-radius:1.5mm;padding:3mm 3.6mm;
+  background:var(--panel);display:flex;align-items:center;gap:4mm}
+.golden .gbig{font-family:var(--disp);font-weight:700;font-size:14mm;color:var(--d-acuario);line-height:.8}
+.golden .gtx{font-family:var(--sans);font-size:3.4mm;line-height:1.3;color:var(--ink2)}
+.golden .gtx b{color:var(--ink);font-weight:700}
+
+.concl{display:flex;flex-direction:column;gap:3mm}
+.concl .c{display:flex;gap:3.4mm;align-items:flex-start}
+.concl .ci{font-family:var(--mono);font-weight:700;font-size:3.4mm;color:var(--signal);margin-top:.4mm;flex:none}
+.concl .ct{font-family:var(--sans);font-size:3.75mm;line-height:1.28;color:var(--ink)}
+.concl .ct b{font-weight:700}
+
+/* ============================ FOOTER ============================ */
+.footer{padding-top:5mm;border-top:.7mm solid var(--ink);
+  display:flex;justify-content:space-between;align-items:flex-end;gap:8mm}
+.refs{flex:1}
+.refs .rh{font-family:var(--mono);font-size:2.7mm;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;margin-bottom:2.4mm}
+.refs .rl{display:flex;flex-wrap:wrap;gap:2mm 2.4mm}
+.refs .rc{font-family:var(--mono);font-size:2.75mm;color:var(--ink2);border:.35mm solid var(--line);
+  border-radius:5mm;padding:.5mm 2.2mm;letter-spacing:.02em}
+.refs .rc b{color:var(--ink);font-weight:700}
+.colofon{text-align:right;font-family:var(--mono);font-size:2.85mm;line-height:1.6;color:var(--ink2);letter-spacing:.04em;white-space:nowrap}
+.colofon b{color:var(--ink);font-weight:700}
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="frame"></div>
+  <div class="crop tl"></div><div class="crop tr"></div><div class="crop bl"></div><div class="crop br"></div>
+  <div class="platecode">BIONEXO · LÁMINA 01 · ENSAMBLAJES EVOLUTIVOS · MMXXVI</div>
+
+  <div class="content">
+
+    <div class="head">
+    <!-- ===================== MASTHEAD ===================== -->
+    <div class="masthead">
+      <div>
+        <div class="eyebrow">Universidad Politécnica de Chiapas · Ingeniería en Software</div>
+        <div class="title">Bio<span class="x">N</span>exo</div>
+        <div class="subtitle">Framework evolutivo multidominio para el diseño de ensamblajes biológicos mediante Algoritmos Genéticos</div>
+      </div>
+      <div class="identity">
+        <div class="id-block">
+          <div class="id-uni">Inteligencia<br>Artificial</div>
+          <div class="id-line">PROYECTO INTEGRADOR · 2026</div>
+          <div class="id-auth">
+            <b>Miguel Á. Molina Gómez</b><br>
+            Miguel Á. Gutiérrez Gómez<br>
+            Jesús I. Castillo Avendaño
+          </div>
+          <div class="id-role">ASESOR · MTRO. ALI S. LÓPEZ ZUNÚN</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-d"></div>
+
+    <!-- ===================== TESIS ===================== -->
+    <div class="thesis">
+      <div class="big">Un&nbsp;solo&nbsp;motor.</div>
+      <div class="tdot"></div>
+      <div class="small"><b>Cinco dominios biológicos</b> resueltos por el mismo Algoritmo Genético, sin tocar el motor: la diferencia entre un acuario y un bosque vive en los <b>datos (CSV)</b> y en un <b>esquema de configuración (YAML)</b>, no en el código.</div>
+    </div>
+    </div><!-- /head -->
+
+    <!-- ===================== CUERPO ===================== -->
+    <div class="body">
+
+      <!-- ---------- COLUMNA IZQUIERDA ---------- -->
+      <div class="col">
+
+        <div>
+          <div class="sec"><span class="n">§01</span><span class="t">Objetivo</span><span class="r"></span></div>
+          <p class="lead">Generalizar <b>AcuCosmos</b> —un AG que diseñaba acuarios— a un <b>framework</b> que genera ensamblajes biológicamente viables y de alta calidad para cinco dominios, optimizando los objetivos que <b>cada dominio declara</b>, sobre un <b>único motor evolutivo agnóstico de dominio</b> más una <b>capa de dominio enchufable</b> (patrones <span class="kw">Strategy</span> + <span class="kw">Registry</span>). AcuCosmos se conserva intacto y pasa a ser uno de los cinco.</p>
+        </div>
+
+        <div>
+          <div class="sec"><span class="n">§02</span><span class="t">El problema</span><span class="r"></span></div>
+          <div class="quote">
+            <div class="q">Seleccionar un <b>subconjunto</b> de un catálogo de especies, con <b>cantidades</b>, colocarlo en un <b>sitio</b>, respetando tolerancias ambientales, compatibilidades por pares, capacidad de carga y presupuesto, para <b>maximizar uno o varios objetivos</b>.</div>
+            <div class="cap">El patrón abstracto común a los cinco dominios</div>
+          </div>
+          <div class="stat">
+            <div class="num">10<sup>30</sup></div>
+            <div class="txt"><b>combinaciones</b> solo en el acuario (100 especies × 10 tanques × cantidades). La selección manual es inviable; los errores cuestan inversión, equilibrio y vidas. Es el terreno natural de las <b>metaheurísticas evolutivas</b>.</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec"><span class="n">§04</span><span class="t">Representación del individuo</span><span class="r"></span></div>
+          <div class="diagcap"><span>Fig. 02 · Codificación del cromosoma</span><span>idéntica en los 5 dominios</span></div>
+          <div class="chrom">
+            <div class="gene"><span class="gl">sitio</span><span class="gv">3</span></div>
+            <div class="btrack">
+              <div class="blabel"><span>B — presencia sobre el catálogo</span><span>0 / 1</span></div>
+              <div class="bcells" id="bcells"></div>
+            </div>
+          </div>
+          <div class="legend">
+            <span><b>B</b> binario: qué especies</span>
+            <span><b>C</b> nº de ejemplares</span>
+            <span><b>D</b> proporción · Σ=1</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec"><span class="n">§06</span><span class="t">Ciclo evolutivo</span><span class="r"></span></div>
+          <div class="diagcap"><span>Fig. 03 · Motor (μ+λ) — intacto respecto a AcuCosmos</span></div>
+          <div class="cycle" id="cycle"></div>
+          <div class="cfeat">
+            <span><b>Hall of Fame</b> · Top-K</span>
+            <span><b>Reinicio</b> anti-estancamiento</span>
+            <span><b>Paro</b> temprano</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ---------- COLUMNA DERECHA ---------- -->
+      <div class="col">
+
+        <div>
+          <div class="sec"><span class="n">§03</span><span class="t">Arquitectura</span><span class="r"></span></div>
+          <div class="diagcap"><span>Fig. 01 · Motor único + capa de dominio enchufable</span></div>
+          <div style="display:flex;gap:4mm;align-items:stretch">
+            <div style="flex:1">
+              <div class="chips2">
+                <div class="chip"><div class="ct">DATOS</div><div class="cs">catálogo · sitios · κ · escenarios · CSV</div></div>
+                <div class="chip"><div class="ct">CONFIG</div><div class="cs">esquema de dominio · YAML</div></div>
+              </div>
+              <div class="arrow"><svg viewBox="0 0 40 24" width="40"><path d="M20 1 V17 M11 11 L20 20 L29 11" fill="none" stroke="#1C1B16" stroke-width="1.6"/></svg></div>
+              <div class="box">
+                <span class="tagr">enchufable</span>
+                <div class="bt">Capa de dominio</div>
+                <div class="bs">esquema · métricas (registro) · agregación · heurísticas · escenarios</div>
+              </div>
+              <div class="arrow"><svg viewBox="0 0 40 24" width="40"><path d="M20 1 V17 M11 11 L20 20 L29 11" fill="none" stroke="#1C1B16" stroke-width="1.6"/></svg><span class="albl">ContextoEvaluacion</span></div>
+              <div class="box eng">
+                <span class="tagr">intacto</span>
+                <div class="bt">Motor evolutivo</div>
+                <div class="bs">población → selección → cruza → mutación → reparación → poda (μ+λ) elitista</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center"><div class="sidetag">Strategy · Registry</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec"><span class="n">§05</span><span class="t">Evaluador genérico de aptitud</span><span class="r"></span></div>
+          <div class="diagcap"><span>Fig. 04 · Pipeline compartido por todos los dominios</span></div>
+          <div class="flow">
+            <div class="fstep"><span class="fnum">1</span><span class="ftxt"><b>Métricas</b> declaradas en el YAML <span class="mono">→ valor crudo</span></span></div>
+            <div class="fline"><div class="fconn"></div></div>
+            <div class="fstep"><span class="fnum">2</span><span class="ftxt"><b>Transformación</b> <span class="mono">saturación · normalización [0,1]</span></span></div>
+            <div class="fline"><div class="fconn"></div></div>
+            <div class="fstep"><span class="fnum">3</span><span class="ftxt"><b>Peso × signo</b> <span class="mono">(+1 maximiza · −1 minimiza)</span></span></div>
+            <div class="fline"><div class="fconn"></div></div>
+            <div class="fstep"><span class="fnum">4</span><span class="ftxt"><b>Agregación</b> configurable <span class="mono">→ aptitud</span></span></div>
+            <div class="fline"><div class="fconn"></div></div>
+            <div class="fstep"><span class="fnum">5</span><span class="ftxt"><b>Restricciones</b> <span class="mono">factibilidad · penalización</span></span></div>
+          </div>
+          <div class="fout">
+            <span class="pill">F — reporte / Hall of Fame</span>
+            <span class="pill red">score — selección</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec"><span class="n">§07</span><span class="t">Agregación &amp; restricciones</span><span class="r"></span></div>
+          <div class="twolist">
+            <div class="tl">
+              <h4>Agregación multiobjetivo</h4>
+              <ul>
+                <li><b>›</b> suma_simple</li>
+                <li><b>›</b> suma_normalizada</li>
+                <li><b>›</b> pareto_nsga2 · Deb</li>
+                <li><b>›</b> borda · votación</li>
+                <li><b>›</b> nsga3 · Das-Dennis</li>
+              </ul>
+            </div>
+            <div class="tl">
+              <h4>Penalización</h4>
+              <ul>
+                <li><b>›</b> mortal</li>
+                <li><b>›</b> graduada</li>
+                <li><b>›</b> dinámica</li>
+              </ul>
+              <div class="note">Mejoras de método solicitadas: conservar el gradiente hacia lo factible.</div>
+            </div>
+          </div>
+          <div class="formula">w(g) = w₀ · (1 + α · g/G)</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================== BASE DE CONOCIMIENTO ===================== -->
+    <div class="kbstrip">
+      <div class="kbhead"><span class="t"><span>§</span>Base de conocimiento — kb/</span><span class="s">cada dominio se declara con datos, no con código</span></div>
+      <div class="kbflow">
+        <div class="kbchip"><div class="kt">Catálogo</div><div class="ks">especies · rasgos ambientales, estrato, talla, precio</div></div>
+        <div class="kbsep">→</div>
+        <div class="kbchip"><div class="kt">Sitios</div><div class="ks">capacidad de carga + costo</div></div>
+        <div class="kbsep">→</div>
+        <div class="kbchip"><div class="kt">Interacciones</div><div class="ks">pares documentados · lista dispersa [−2,+2]</div></div>
+        <div class="kbsep">→</div>
+        <div class="kbchip"><div class="kt">Escenarios</div><div class="ks">refs ambientales · presupuesto · rango</div></div>
+        <div class="kbsep">+</div>
+        <div class="kbchip"><div class="kt">Heurísticas</div><div class="ks">derivan pares · evitan investigar N²</div></div>
+      </div>
+      <div class="kbbottom">
+        <div class="kbnote">Hallazgo universal de diseño: las <b>referencias ambientales</b> viven en el <b>escenario</b>; la <b>capacidad y el costo</b> viven en el <b>sitio</b>. La misma separación rige en los cinco dominios.</div>
+        <div class="recipe"><span class="rn">1</span>kb/&lt;dom&gt;/*.csv<span class="ra">›</span><span class="rn">2</span>config/&lt;dom&gt;.yaml<span class="ra">›</span><span class="rn">3</span>main.py --dominio</div>
+      </div>
+    </div>
+
+    <!-- ===================== BANDA DE DOMINIOS ===================== -->
+    <div class="domains">
+      <div class="sec"><span class="n">§08</span><span class="t">Alcance — cinco dominios, un motor</span><span class="r"></span></div>
+      <div class="dgrid" id="dgrid"></div>
+    </div>
+
+    <!-- ===================== RESULTADOS / CONCLUSIONES ===================== -->
+    <div class="lower">
+      <div>
+        <div class="sec"><span class="n">§09</span><span class="t">Resultados</span><span class="r"></span></div>
+        <div class="chartwrap">
+          <div class="chart" id="chart"></div>
+        </div>
+      </div>
+      <div>
+        <div class="sec"><span class="n">§10</span><span class="t">Conclusiones</span><span class="r"></span></div>
+        <div class="concl">
+          <div class="c"><span class="ci">01</span><span class="ct">Un <b>mismo motor</b>, sin reescritura ni condicionales <span class="kw">if dominio</span>, resuelve el patrón abstracto de <b>selección bajo restricciones</b> común a los cinco dominios.</span></div>
+          <div class="c"><span class="ci">02</span><span class="ct">Añadir un dominio nuevo = <b>datos + un YAML</b>. La variabilidad vive en configuración, no en el algoritmo.</span></div>
+          <div class="c"><span class="ci">03</span><span class="ct">Las <b>mejoras de método</b> —penalización graduada/dinámica y agregación Pareto/Borda— quedan como opciones declarativas comparables.</span></div>
+          <div class="c"><span class="ci">04</span><span class="ct">Metodología <b>transferible</b> a cualquier problema de selección-configuración bajo restricciones.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== FOOTER ===================== -->
+    <div class="footer">
+      <div class="refs">
+        <div class="rh">Fundamento bibliográfico</div>
+        <div class="rl">
+          <span class="rc">Goldberg <b>[1]</b> · AG</span>
+          <span class="rc">Eiben &amp; Smith <b>[2]</b></span>
+          <span class="rc">DEAP <b>[3]</b> · framework</span>
+          <span class="rc">Gamma <b>[4]</b> · GoF</span>
+          <span class="rc">Coello <b>[5]</b> · restricciones</span>
+          <span class="rc">Deb <b>[9]</b> · NSGA-II</span>
+          <span class="rc">NSGA-III <b>[10]</b></span>
+          <span class="rc">Borda <b>[12]</b></span>
+          <span class="rc">Shannon <b>[13]</b></span>
+          <span class="rc">Loreau &amp; Hector <b>[14]</b></span>
+          <span class="rc">Chave <b>[22]</b> · CO₂</span>
+        </div>
+      </div>
+      <div class="colofon">
+        <b>BioNexo</b> · Algoritmo Genético desde cero (Python)<br>
+        Motor único · capa enchufable · ~58 pruebas verdes<br>
+        Suchiapa, Chiapas · MMXXVI
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ---------- cromosoma: 24 celdas, activas marcadas ---------- */
+(function(){
+  const on=new Set([2,5,6,11,15,16,21]); const sig=2;
+  const c=document.getElementById('bcells');
+  for(let i=0;i<24;i++){const d=document.createElement('div');d.className='bc'+(on.has(i)?' on':'')+(i===sig?' s':'');c.appendChild(d);}
+})();
+
+/* ---------- ciclo evolutivo ---------- */
+(function(){
+  const steps=[
+    ['Inicio','Dirichlet'],['Evaluar','F · score'],['Torneo','selección'],
+    ['Cruza','uniforme'],['Mutación','×4'],['Reparar','factible'],['Poda','μ+λ']
+  ];
+  const ico=[
+    'M12 3 a9 9 0 1 0 .01 0 M12 3 v4', // init (semilla/círculo)
+    'M3 12 h5 l2 -5 l3 10 l2 -7 l2 2 h4', // eval (señal)
+    'M4 6 h7 M4 12 h12 M4 18 h5', // torneo (barras)
+    'M5 5 v14 M19 5 v14 M5 9 L19 15 M19 9 L5 15', // cruza (x)
+    'M12 4 v16 M6 9 l6 -5 l6 5', // mutación (flecha)
+    'M5 12 h14 M9 8 l-4 4 l4 4 M15 8 l4 4 l-4 4', // reparar (↔)
+    'M4 17 l5 -8 l4 5 l3 -7 l4 10' // poda (cumbre)
+  ];
+  const wrap=document.getElementById('cycle');
+  steps.forEach((s,i)=>{
+    const d=document.createElement('div');d.className='cstep';
+    d.innerHTML='<div class="cg"><svg viewBox="0 0 24 24" width="100%" height="100%" style="max-height:9mm"><path d="'+ico[i]+'" fill="none" stroke="#1C1B16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="cl">'+s[0]+'</div><div class="cs">'+s[1]+'</div>';
+    wrap.appendChild(d);
+    if(i<steps.length-1){const a=document.createElement('div');a.className='cArrow';a.innerHTML='<svg viewBox="0 0 12 24" width="100%"><path d="M2 12 h7 M6 8 l4 4 l-4 4" fill="none" stroke="#8A8270" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';wrap.appendChild(a);}
+  });
+  // bucle de retorno (texto)
+  const loop=document.createElement('div');
+})();
+
+/* ---------- banda de dominios ---------- */
+(function(){
+  const ICON={
+    pez:'<svg viewBox="0 0 100 60"><g fill="CCC"><path d="M8 30 C20 12 48 12 64 22 C70 14 80 12 90 12 C84 22 84 24 86 30 C84 36 84 38 90 48 C80 48 70 46 64 38 C48 48 20 48 8 30 Z"/><circle cx="26" cy="28" r="2.6" fill="#F1ECDF"/><path d="M50 22 q8 8 0 16" fill="none" stroke="#F1ECDF" stroke-width="1.6"/></g></svg>',
+    camaron:'<svg viewBox="0 0 100 60"><g fill="none" stroke="CCC" stroke-width="4.4" stroke-linecap="round"><path d="M84 16 C84 40 64 50 40 50 C22 50 14 40 18 30 C22 22 34 22 36 30"/></g><g fill="CCC"><circle cx="83" cy="15" r="4.2"/><path d="M30 49 l-4 7 M40 51 l-3 7 M50 50 l-2 7 M60 47 l0 8"/><path d="M84 16 q8 -8 14 -6 M84 19 q9 -4 15 0" fill="none" stroke="CCC" stroke-width="2"/></g></svg>',
+    planta:'<svg viewBox="0 0 100 60"><g stroke="CCC" stroke-width="4" fill="none" stroke-linecap="round"><path d="M50 54 V24"/></g><g fill="CCC"><path d="M50 30 C36 30 28 22 26 10 C40 10 49 17 50 30 Z"/><path d="M50 36 C64 36 72 28 74 16 C60 16 51 23 50 36 Z"/><path d="M50 24 C44 16 45 8 50 2 C55 8 56 16 50 24 Z"/></g><path d="M40 54 h20" stroke="CCC" stroke-width="3" stroke-linecap="round"/></svg>',
+    arbol:'<svg viewBox="0 0 100 60"><rect x="46" y="34" width="8" height="22" rx="2" fill="CCC"/><g fill="CCC"><circle cx="50" cy="22" r="16"/><circle cx="34" cy="30" r="11"/><circle cx="66" cy="30" r="11"/><circle cx="50" cy="34" r="12"/></g></svg>',
+    gallina:'<svg viewBox="0 0 100 60"><g fill="CCC"><path d="M30 50 C18 50 16 36 26 30 C24 20 34 14 44 18 C46 10 58 10 60 18 C74 16 84 26 80 38 C88 36 92 44 86 50 Z"/><path d="M60 16 q6 -6 12 -4 q-2 6 -8 8 Z"/><path d="M84 30 l8 -3 l-6 6 Z"/><circle cx="74" cy="26" r="2" fill="#F1ECDF"/></g><path d="M40 50 v7 M52 50 v7" stroke="CCC" stroke-width="3" stroke-linecap="round"/></svg>'
+  };
+  const D=[
+    {c:'--d-acuario',ic:'pez',code:'peces_ornamental',name:'Acuario ornamental',count:'100 esp · 10 sitios',obj:'Estética y biodiversidad equilibradas, sin agresiones ni sobrecarga del filtro',agg:'SUMA'},
+    {c:'--d-acuicola',ic:'camaron',code:'fauna_acuicola',name:'Policultivo acuícola',count:'40 esp · 9 sitios',obj:'Biomasa × valor de mercado, con equilibrio ecológico del estanque',agg:'PARETO'},
+    {c:'--d-huerto',ic:'planta',code:'plantas_jardin',name:'Huerto de asociación',count:'40 esp · 9 sitios',obj:'Valor agronómico + polinizadores + sinergia (companion planting)',agg:'SUMA'},
+    {c:'--d-bosque',ic:'arbol',code:'arboles_bosque',name:'Bosque / agroforestería',count:'43 especies',obj:'CO₂ por alometría de Chave + biodiversidad + facilitación nodriza',agg:'PARETO'},
+    {c:'--d-granja',ic:'gallina',code:'fauna_terrestre',name:'Granja integrada',count:'24 razas · 10 sitios',obj:'Producción + sinergias cultivo–ganado, evitando antagonismos',agg:'SUMA'}
+  ];
+  const root=getComputedStyle(document.documentElement);
+  const grid=document.getElementById('dgrid');
+  D.forEach(d=>{
+    const col=root.getPropertyValue(d.c).trim();
+    const cell=document.createElement('div');cell.className='dcell';
+    cell.innerHTML=
+      '<div class="dtop" style="background:'+col+'"></div>'+
+      '<div class="dicon">'+ICON[d.ic].replace(/CCC/g,col)+'</div>'+
+      '<div class="dcode" style="color:'+col+'">'+d.code+'</div>'+
+      '<div class="dname">'+d.name+'</div>'+
+      '<div class="dcount">'+d.count+'</div>'+
+      '<div class="dobj">'+d.obj+'</div>'+
+      '<div class="dagg" style="background:'+col+'">'+d.agg+'</div>';
+    grid.appendChild(cell);
+  });
+})();
+
+/* ---------- gráfica de convergencia ---------- */
+(function(){
+  const W=560,H=270,pl=52,pr=16,pt=16,pb=42;
+  const x0=pl,x1=W-pr,y0=H-pb,y1=pt;
+  function X(t){return x0+(x1-x0)*t;}
+  function Y(v){return y0+(y1-y0)*v;}
+  // curva "mejor": sube y satura
+  const best=[];for(let i=0;i<=40;i++){const t=i/40;best.push([t, 1-Math.exp(-t*5.2)*0.92]);}
+  // curva "promedio": por debajo, más ruidosa pero monótona suave
+  const avg=[];for(let i=0;i<=40;i++){const t=i/40;avg.push([t,(1-Math.exp(-t*3.4))*0.82]);}
+  const path=a=>a.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ');
+  let grid='';
+  for(let i=0;i<=4;i++){const y=Y(i/4);grid+='<line x1="'+x0+'" y1="'+y+'" x2="'+x1+'" y2="'+y+'" stroke="#DAD2BF" stroke-width="1"/>';}
+  const svg=
+  '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block">'+
+   grid+
+   '<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y0+'" stroke="#1C1B16" stroke-width="1.4"/>'+
+   '<line x1="'+x0+'" y1="'+y0+'" x2="'+x0+'" y2="'+y1+'" stroke="#1C1B16" stroke-width="1.4"/>'+
+   '<path d="'+path(avg)+'" fill="none" stroke="#5B5547" stroke-width="2" stroke-dasharray="5 4"/>'+
+   '<path d="'+path(best)+'" fill="none" stroke="#B23A1E" stroke-width="3"/>'+
+   '<circle cx="'+X(1)+'" cy="'+Y(best[40][1])+'" r="4.5" fill="#B23A1E"/>'+
+   '<text x="'+(X(1)-6)+'" y="'+(Y(best[40][1])-9)+'" text-anchor="end" font-family="JBMono" font-size="13" fill="#1C1B16">factible · alta calidad</text>'+
+   '<text x="'+x0+'" y="'+(H-10)+'" font-family="JBMono" font-size="13" fill="#5B5547">0</text>'+
+   '<text x="'+x1+'" y="'+(H-10)+'" text-anchor="end" font-family="JBMono" font-size="13" fill="#5B5547">generaciones →</text>'+
+   '<text x="14" y="'+y1+'" font-family="JBMono" font-size="13" fill="#5B5547" transform="rotate(-90 14 '+(H/2)+')" text-anchor="middle">aptitud F</text>'+
+   '<text x="'+(X(.62))+'" y="'+(Y(best[25][1])-12)+'" font-family="WorkSans" font-weight="700" font-size="14" fill="#B23A1E">mejor</text>'+
+   '<text x="'+(X(.66))+'" y="'+(Y(avg[24][1])+20)+'" font-family="WorkSans" font-size="13" fill="#5B5547">promedio</text>'+
+  '</svg>';
+  document.getElementById('chart').innerHTML=svg+
+   '<div class="golden"><div class="gbig">≡</div><div class="gtx"><b>Regresión por golden output:</b> el acuario original se reproduce <b>byte a byte</b> tras la generalización. Converge en <b>pocas generaciones</b> explorando una fracción ínfima de &gt;10<sup>30</sup>.</div></div>'+
+   '<ul class="resbul">'+
+   '<li><b>Factibilidad</b> consistente en los 5 dominios: tolerancias ambientales, capacidad y presupuesto respetados.</li>'+
+   '<li><span class="mono"><b>~58 pruebas</b></span> verdes: golden · equivalencia · invariantes · metamórficas · fuzz · por dominio.</li>'+
+   '</ul>';
+})();
+</script>
+</body>
+</html>

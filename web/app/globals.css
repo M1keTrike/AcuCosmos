@@ -1,12 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #060912;
-  --foreground: #e8eef7;
-  --panel: #0d1424;
-  --panel-2: #111a2e;
-  --borde: #1e2a44;
-  --muted: #8aa0c0;
+  /* Paleta del cartel BioNexo — tema claro */
+  --background: #eaf0ed;   /* papel (lienzo) */
+  --foreground: #0e2e2b;   /* tinta (texto principal) */
+  --panel: #ffffff;        /* tarjetas */
+  --panel-2: #f1f6f4;      /* relleno suave dentro de tarjetas */
+  --borde: #c9d6d1;        /* divisores */
+  --muted: #4a5c58;        /* texto secundario */
+  --teal: #0f8b7e;         /* acento bio-computacional */
+  --teal-dk: #0b5f57;
+  --amber: #e0922b;        /* acento cálido */
 
   /* Curvas de easing fuertes (las nativas se sienten flojas) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -20,6 +24,9 @@
   --color-panel-2: var(--panel-2);
   --color-borde: var(--borde);
   --color-muted: var(--muted);
+  --color-teal: var(--teal);
+  --color-teal-dk: var(--teal-dk);
+  --color-amber: var(--amber);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -33,12 +40,12 @@ body {
 
 body {
   background:
-    radial-gradient(1200px 700px at 80% -10%, rgba(56, 189, 248, 0.08), transparent 60%),
-    radial-gradient(900px 600px at 10% 110%, rgba(34, 197, 94, 0.06), transparent 55%),
+    radial-gradient(1200px 700px at 80% -10%, rgba(15, 139, 126, 0.06), transparent 60%),
+    radial-gradient(900px 600px at 10% 110%, rgba(90, 166, 59, 0.05), transparent 55%),
     var(--background);
 }
 
-/* Scrollbar discreto y oscuro */
+/* Scrollbar discreto y claro */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--borde) transparent;
@@ -68,13 +75,14 @@ body {
 }
 
 .tarjeta {
-  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  background: var(--panel);
   border: 1px solid var(--borde);
-  border-radius: 18px;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(14, 46, 43, 0.05);
 }
 
 .titulo-grad {
-  background: linear-gradient(90deg, #38bdf8, #22d3ee 40%, #34d399 80%);
+  background: linear-gradient(90deg, #0f8b7e, #0b5f57);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -84,7 +92,7 @@ body {
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 .boton-acento:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
   transform: translateY(-1px);
 }
 .boton-acento:active {
@@ -105,7 +113,7 @@ body {
 }
 @media (hover: hover) and (pointer: fine) {
   .boton-juego:hover {
-    filter: brightness(1.06);
+    filter: brightness(1.04);
     transform: translateY(-2px);
   }
 }

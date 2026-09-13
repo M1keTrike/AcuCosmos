@@ -109,6 +109,10 @@ def dominios():
             out.append({"id": dom, "error": str(e)})
             continue
         t = temas.tema(dom)
+        # Metadatos del control de capacidad del sitio (solo si el dominio tiene
+        # el rol capacidad_sitio): etiqueta/unidad para el override en la GUI.
+        cap_meta = temas.capacidad_meta(dom) \
+            if esquema.col("capacidad_sitio") else None
         out.append({
             "id": dom,
             "dominio": esquema.dominio,
@@ -118,6 +122,7 @@ def dominios():
             "agregacion": esquema.agregacion,
             "n_especies": int(len(catalogo)),
             "estratos": _estratos_meta(esquema, t),
+            "capacidad": cap_meta,
             "tema": {
                 "acento": t["acento"], "acento2": t["acento2"],
                 "fondo": t["fondo"], "fondo2": t["fondo2"],
@@ -181,6 +186,46 @@ def catalogo(dom: str):
         "grupos": grupos,
         "especies": especies,
     }
+
+
+def _humaniza(s) -> str:
+    return str(s).replace("_", " ").strip().capitalize()
+
+
+def nombre_sitio(sit, i) -> str:
+    """Nombre legible del sitio en la posicion i. Regla unica usada tanto por el
+    endpoint `sitios()` como por el evento `done` de la corrida (api/streaming):
+    `nombre` -> `tipo` humanizado -> `id` -> "Sitio N"."""
+    try:
+        fila = sit.iloc[int(i)]
+    except Exception:
+        return str(i)
+    cols = list(sit.columns)
+    for c in ("nombre", "nombre_sitio", "sitio"):
+        if c in cols and fila[c] is not None:
+            return str(fila[c])
+    if "tipo" in cols and fila["tipo"] is not None:
+        return _humaniza(fila["tipo"])
+    if "id" in cols and fila["id"] is not None:
+        return str(fila["id"])
+    return f"Sitio {int(i) + 1}"
+
+
+def sitios(dom: str):
+    """Lista de sitios/tanques (el 'tipo de acuario' del dominio), por indice
+    posicional — el mismo que usan `tanques_permitidos`/`mejor["tanque"]`."""
+    _esq, _cat, sit, _kap, _esc = _cargar(dom)
+    cols = list(sit.columns)
+    col_cap = _esq.col("capacidad_sitio")          # capacidad del sitio (filtro/area)
+    out = []
+    for i, (_, fila) in enumerate(sit.iterrows()):
+        detalle = str(fila["descripcion"]) if "descripcion" in cols and \
+            fila["descripcion"] is not None else None
+        cap = jf(fila[col_cap]) if (col_cap and col_cap in cols) else None
+        out.append({"idx": i, "nombre": nombre_sitio(sit, i),
+                    "detalle": detalle[:140] if detalle else None,
+                    "capacidad": cap})
+    return out
 
 
 def kappa(dom: str):

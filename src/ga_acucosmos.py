@@ -21,8 +21,15 @@ def EjecutarAG(ctx: ContextoEvaluacion,
                top_k: int = 3,
                verbose: bool = True,
                seed: Optional[int] = None,
+               cap_estricto: bool = False,
+               especies_fijas: Optional[List[int]] = None,
                callback: Optional[Callable[[Dict, Dict], None]] = None
                ) -> Tuple[Dict, List[Dict], List[Dict], List[float], List[Dict]]:
+    # `cap_estricto=True` => max_especies se aplica como TOPE DURO (la reparacion
+    # poda el exceso). Default False => byte-identico al golden (max_especies solo
+    # acota la poblacion inicial y normaliza el bono de diversidad).
+    # `especies_fijas` => indices del catalogo que SIEMPRE estaran en el ensamblaje
+    # (ancla / base de la busqueda). Default None => sin anclas (golden intacto).
     # `callback(registro_historial, mejor_individuo_de_la_gen)` se invoca tras cada
     # generacion (gen 0 incluida) para transmitir el AG en vivo. Default None =>
     # camino byte-identico (golden output intacto): es extender, no modificar.
@@ -32,6 +39,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
     tanques = ctx.sitios
     esquema = ctx.esquema
     ctx.generaciones_max = generaciones_max
+    cap = max_especies if cap_estricto else None     # tope duro de riqueza (o None)
+    piso = min_especies if cap_estricto else None    # piso duro de riqueza (o None)
 
     def _hist_reg(gen, mejor, peor, prom, m):
         # registro generico: metricas por su clave_reporte (peces conserva A_e..M_s)
@@ -54,7 +63,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
     poblacion = FuncionInicializacion(
         tam_poblacion, catalogo, tanques, esquema,
         min_especies=min_especies, max_especies=max_especies,
-        tanques_permitidos=tanques_permitidos
+        tanques_permitidos=tanques_permitidos,
+        especies_fijas=especies_fijas
     )
     aptitudes = []
     metricas_list = []
@@ -112,11 +122,17 @@ def EjecutarAG(ctx: ContextoEvaluacion,
             padre_a = SeleccionTorneo(poblacion, scores, t=t_torneo)
             padre_b = SeleccionTorneo(poblacion, scores, t=t_torneo)
             h1, h2 = CruzaUniforme(padre_a, padre_b, catalogo, tanques, esquema,
-                                   tanques_permitidos=tanques_permitidos)
+                                   tanques_permitidos=tanques_permitidos,
+                                   max_especies=cap, min_especies=piso,
+                                   especies_fijas=especies_fijas)
             h1 = FuncionMutacion(h1, catalogo, tanques, esquema,
-                                 tanques_permitidos=tanques_permitidos)
+                                 tanques_permitidos=tanques_permitidos,
+                                 max_especies=cap, min_especies=piso,
+                                 especies_fijas=especies_fijas)
             h2 = FuncionMutacion(h2, catalogo, tanques, esquema,
-                                 tanques_permitidos=tanques_permitidos)
+                                 tanques_permitidos=tanques_permitidos,
+                                 max_especies=cap, min_especies=piso,
+                                 especies_fijas=especies_fijas)
             hijos.append(h1)
             if len(hijos) < tam_poblacion:
                 hijos.append(h2)
@@ -163,7 +179,8 @@ def EjecutarAG(ctx: ContextoEvaluacion,
                 nuevos = FuncionInicializacion(
                     n_rein, catalogo, tanques, esquema,
                     min_especies=min_especies, max_especies=max_especies,
-                    tanques_permitidos=tanques_permitidos
+                    tanques_permitidos=tanques_permitidos,
+                    especies_fijas=especies_fijas
                 )
                 nuevas_apt = []
                 nuevas_met = []

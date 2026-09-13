@@ -39,7 +39,7 @@ export function StrataBars({
             const n = conteo[e.idx] ?? 0;
             return (
               <div key={e.idx} className="flex items-center gap-3">
-                <span className="w-28 shrink-0 truncate text-right text-xs text-white/65">
+                <span className="w-28 shrink-0 truncate text-right text-xs text-foreground/65">
                   {e.etiqueta}
                 </span>
                 <div className="h-5 flex-1 overflow-hidden rounded-md bg-panel-2">
@@ -48,7 +48,7 @@ export function StrataBars({
                     style={{ width: `${(n / max) * 100}%`, background: acento }}
                   />
                 </div>
-                <span className="w-8 shrink-0 text-right font-mono text-xs text-white/80">
+                <span className="w-8 shrink-0 text-right font-mono text-xs text-foreground/80">
                   {n}
                 </span>
               </div>
