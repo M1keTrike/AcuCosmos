@@ -17,3 +17,4 @@ resultados/
 .claude/
 *.md
 .opencode/
+opencode.json
